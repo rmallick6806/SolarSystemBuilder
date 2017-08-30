@@ -14,14 +14,13 @@ registerServiceWorker();
 
 const radiusMin = 190, // Min radius of the planet belt.
   radiusMax = 300, // Max radius of the planet belt.
-  particleCount = 1, // Ammount of planets.
-  particleMinRadius = 20, // Min of planet radius.
-  particleMaxRadius = 50, // Max of planet radius.
+  planetCount = 1, // Ammount of planets.
+  planetMinRadius = 20, // Min of planet radius.
+  planetMaxRadius = 50, // Max of planet radius.
   asteroidMinRadius = 1,
   asteroidMaxRadius = 3,
   sunSize = 140; // Radius of sun
 
-const space = new WHS.Group();
 const orbitModule = new WHS.OrbitControlsModule();
 const mouse = new WHS.VirtualMouseModule();
 const camera = new WHS.PerspectiveCamera({
@@ -30,6 +29,7 @@ const camera = new WHS.PerspectiveCamera({
   fov: 75,
   near: 1
 });
+
 const app = new WHS.App([
   new WHS.ElementModule({
     container: document.getElementById('mainContainer')
@@ -50,123 +50,73 @@ const app = new WHS.App([
   new WHS.ResizeModule(),
   mouse
 ]);
-const sun = star(sunSize, colors.sun);
+const space = new WHS.Group();
 const planets = new WHS.Group();
+const sun = star(sunSize, colors.sun);
 const dynamicGeometry = new WHS.DynamicGeometryModule();
 const material = new THREE.MeshStandardMaterial({
   shading: THREE.FlatShading,
   emissive: 0x270000,
   roughness: 0.9
 });
-
-space.addTo(app);
-space.rotation.z = Math.PI / 12;
-sun.addTo(space);
-
-Lights.DirectionalLight.addTo(app);
-Lights.AmbientLight.addTo(app);
-
-const s1 = new WHS.Dodecahedron({
-  geometry: {
-    buffer: true,
-    radius: 10
-  },
-
-  modules: [
-    dynamicGeometry
-  ],
-
-  material
-});
-
-const s2 = new WHS.Box({
-  geometry: {
-    buffer: true,
-    width: 10,
-    height: 10,
-    depth: 10
-  },
-
-  modules: [
-    dynamicGeometry
-  ],
-
-  material
-});
-
-const s3 = new WHS.Cylinder({
-  geometry: {
-    buffer: true,
-    radiusTop: 0,
-    radiusBottom: 10,
-    height: 10
-  },
-
-  modules: [
-    dynamicGeometry
-  ],
-
-  material
-});
-
-const s4 = new WHS.Sphere({
-  geometry: {
-    buffer: true,
-    radius: 10
-  },
-
-  modules: [
-    dynamicGeometry
-  ],
-
-  material
-});
-
-var asteroidAnimation;
-
-// Materials.
 const mat = [
   new THREE.MeshPhongMaterial({color: colors.green, shading: THREE.FlatShading}),
   new THREE.MeshPhongMaterial({color: colors.blue, shading: THREE.FlatShading}),
   new THREE.MeshPhongMaterial({color: colors.orange, shading: THREE.FlatShading}),
   new THREE.MeshPhongMaterial({color: colors.blue, shading: THREE.FlatShading})
 ];
+const s1 = planetShape1(dynamicGeometry, material)
+const s2 = planetShape2(dynamicGeometry, material)
+const s3 = planetShape3(dynamicGeometry, material)
+const s4 = planetShape4(dynamicGeometry, material)
 
-for (let i = 0; i < particleCount; i++) {
-  const particle = [s1, s1, s4, s1][Math.ceil(Math.random() * 3)].clone(),
-    radius = particleMinRadius + Math.random() * (particleMaxRadius - particleMinRadius);
+space.addTo(app);
+space.rotation.z = Math.PI / 12;
+sun.addTo(space);
+planets.addTo(space);
 
-  particle.g_({
+// LIGHTS.
+Lights.DirectionalLight.addTo(app);
+Lights.AmbientLight.addTo(app);
+
+
+
+for (let i = 0; i < planetCount; i++) {
+  const planet = [s1, s1, s4, s1][Math.ceil(Math.random() * 3)].clone(),
+    radius = planetMinRadius + Math.random() * (planetMaxRadius - planetMinRadius);
+
+  planet.g_({
     radiusBottom: radius,
     radiusTop: 0,
-    height: particle instanceof WHS.Cylinder ? radius * 2 : radius,
+    height: planet instanceof WHS.Cylinder ? radius * 2 : radius,
     width: radius,
     depth: radius,
     radius
   });
 
-  particle.material = mat[Math.floor(4 * Math.random())]; // Set custom THREE.Material to mesh.
+  planet.material = mat[Math.floor(4 * Math.random())]; // Set custom THREE.Material to mesh.
 
   // Particle data.
-  particle.data = {
+  planet.data = {
     distance: radiusMin + i * (radiusMax - radiusMin),
     angle: Math.random() * Math.PI * 2
   };
 
   // Set position & rotation.
-  particle.position.x = Math.cos(particle.data.angle) * particle.data.distance;
-  particle.position.z = Math.sin(particle.data.angle) * particle.data.distance;
-  particle.position.y = -10 * Math.random() + 4;
-  //
-  particle.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+  planet.position.x = Math.cos(planet.data.angle) * planet.data.distance;
+  planet.position.z = Math.sin(planet.data.angle) * planet.data.distance;
+  planet.position.y = -10 * Math.random() + 4;
 
-  mouse.track(particle);
-  particle.on('click', () => {
-    camera.position.set(particle.position.x + 10, particle.position.y + 10, particle.position.z);
+  planet.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+
+  mouse.track(planet);
+  planet.on('click', () => {
+    camera.position.set(planet.position.y, planet.position.x, planet.position.z);
     animation.stop();
   });
+  planet.addTo(planets);
 
-  const normalsHelper = new THREE.VertexNormalsHelper(particle.native);
+  const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
   app.get('scene').add(normalsHelper);
   // Cone
   const scale = 5;
@@ -175,28 +125,28 @@ for (let i = 0; i < particleCount; i++) {
       radius: scale,
       height: scale*2
     },
+
     material: new THREE.MeshPhongMaterial({
-      color: colors.green,
+      color: 0xff0000,
     }),
     position: [0, scale, 0]
   });
   const upVec = new THREE.Vector3(0, 1, 0);
-  const sg = particle.geometry;
+  const sg = planet.geometry;
   sg.computeVertexNormals(); // compute normals for each vertex
   const face = sg.faces[0]; // the actual face
-  const point = sg.vertices[face.a]; // selected vertice (can be a, b or c
+  const point = sg.vertices[face.a]; // selected vertice (can be a, b or c)
   const pointNormal = face.vertexNormals[0]; // it's normal (a=0)
   const quat = new THREE.Quaternion().setFromUnitVectors(upVec, pointNormal);
 
   const group = new WHS.Group(cone); // = Object3D in Three.js
   group.position.copy(point);
   group.quaternion.copy(quat);
-  group.addTo(particle);
-  particle.addTo(planets);
+  group.addTo(planet);
 
-  if (i === 3) {
+  if (i === 0) {
     const asteroidBelt = new WHS.Group();
-    asteroidBelt.addTo(particle);
+    asteroidBelt.addTo(planet);
     for (let i = 0; i < 300; i++) {
       const asteroidObj = [s1, s2, s3, s4][Math.ceil(Math.random() * 3)].clone(),
         radius = asteroidMinRadius + Math.random() * (asteroidMaxRadius - asteroidMinRadius);
@@ -227,56 +177,29 @@ for (let i = 0; i < particleCount; i++) {
 }
 
 
-planets.addTo(space);
-// Asteroids Animation
-// const asteroidBelt = new WHS.Group();
-// asteroidBelt.addTo(planets);
+// Animating rotating shapes around planet.
+const planetObjs = planets.children;
 
-// Animating rotating shapes around sun.
-const particles = planets.children;
 const animation = new WHS.Loop(() => {
-  for (let i = 0, max = particles.length; i < max; i++) {
-    const particle = particles[i];
+  for (let i = 0, max = planetObjs.length; i < max; i++) {
+    const planetObj = planetObjs[i];
 
-    particle.data.angle += 0.009 / (particle.data.distance / radiusMax);
+    planetObj.data.angle += 0.009 / (planetObj.data.distance / radiusMax);
 
-    particle.position.x = (Math.cos(particle.data.angle) * particle.data.distance);
-    particle.position.z = (Math.sin(particle.data.angle) * particle.data.distance);
+    planetObj.position.x = (Math.cos(planetObj.data.angle) * planetObj.data.distance);
+    planetObj.position.z = (Math.sin(planetObj.data.angle) * planetObj.data.distance);
 
-    // particle.rotation.x += (Math.PI / 60) / (i * 0.9);
-    particle.rotation.y += (Math.PI / 60) / (i * 0.9);
+    planetObj.rotation.x += Math.PI / 60;
+    planetObj.rotation.y += Math.PI / 60;
   }
-
   sun.rotation.y += 0.005;
-});
-
-mouse.track(sun);
-sun.on('click', () => {
-  const newPlanet = new WHS.Tetrahedron({
-    geometry: {
-      radius: 20,
-      detail: 2
-    },
-
-    material: new THREE.MeshStandardMaterial({
-      color: colors.green,
-      shading: THREE.FlatShading,
-      roughness: 0.9,
-      emissive: 0x270000
-    })
-  });
-  newPlanet.position.x = 30;
-  newPlanet.position.z = 30;
-  newPlanet.position.y = 100;
-  newPlanet.addTo(space);
 });
 
 app.addLoop(animation);
 animation.start();
-
 // orbitModule.controls.minPolarAngle = 0;
 // orbitModule.controls.maxPolarAngle = 0;
-orbitModule.controls.minDistance = 300;
+orbitModule.controls.minDistance = 900;
 orbitModule.controls.maxDistance = 1200;
 
 // Start rendering.
