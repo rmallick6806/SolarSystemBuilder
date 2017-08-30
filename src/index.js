@@ -14,7 +14,7 @@ registerServiceWorker();
 
 const radiusMin = 190, // Min radius of the planet belt.
   radiusMax = 300, // Max radius of the planet belt.
-  planetCount = 1, // Ammount of planets.
+  planetCount = 9, // Ammount of planets.
   planetMinRadius = 20, // Min of planet radius.
   planetMaxRadius = 50, // Max of planet radius.
   asteroidMinRadius = 1,
@@ -79,9 +79,7 @@ planets.addTo(space);
 Lights.DirectionalLight.addTo(app);
 Lights.AmbientLight.addTo(app);
 
-
-
-for (let i = 0; i < planetCount; i++) {
+const generatePlanet = function(i) {
   const planet = [s1, s1, s4, s1][Math.ceil(Math.random() * 3)].clone(),
     radius = planetMinRadius + Math.random() * (planetMaxRadius - planetMinRadius);
 
@@ -111,11 +109,45 @@ for (let i = 0; i < planetCount; i++) {
 
   mouse.track(planet);
   planet.on('click', () => {
-    camera.position.set(planet.position.y, planet.position.x, planet.position.z);
+    camera.position.set(planet.position.x + 10, planet.position.y, planet.position.z);
     animation.stop();
   });
   planet.addTo(planets);
+  return planet;
+}
 
+const generateAsteroidBelt = function(planet) {
+  const asteroidBelt = new WHS.Group();
+  asteroidBelt.addTo(planet);
+  for (let i = 0; i < 300; i++) {
+    const asteroidObj = [s1, s2, s3, s4][Math.ceil(Math.random() * 3)].clone(),
+      radius = asteroidMinRadius + Math.random() * (asteroidMaxRadius - asteroidMinRadius);
+
+    asteroidObj.g_({
+      radiusBottom: radius,
+      radiusTop: 0,
+      height: asteroidObj instanceof WHS.Cylinder ? radius * 2 : radius,
+      width: radius,
+      depth: radius,
+      radius
+    });
+    asteroidObj.material = mat[Math.floor(4 * Math.random())]; // Set custom THREE.Material to mesh.
+    // Asteroid data.
+    asteroidObj.data = {
+      distance: radius + i/20 + 50,
+      angle: Math.random() * Math.PI * 2
+    };
+    // Set position & rotation.
+    asteroidObj.position.x = Math.cos(asteroidObj.data.angle) * asteroidObj.data.distance;
+    asteroidObj.position.z = Math.sin(asteroidObj.data.angle) * asteroidObj.data.distance;
+    asteroidObj.position.y = -10 * Math.random() + 4;
+
+    asteroidObj.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+    asteroidObj.addTo(asteroidBelt);
+  }
+}
+
+const addTreeToPlanet = function(planet) {
   const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
   app.get('scene').add(normalsHelper);
   // Cone
@@ -127,7 +159,7 @@ for (let i = 0; i < planetCount; i++) {
     },
 
     material: new THREE.MeshPhongMaterial({
-      color: 0xff0000,
+      color: colors.green,
     }),
     position: [0, scale, 0]
   });
@@ -143,43 +175,19 @@ for (let i = 0; i < planetCount; i++) {
   group.position.copy(point);
   group.quaternion.copy(quat);
   group.addTo(planet);
-
-  if (i === 0) {
-    const asteroidBelt = new WHS.Group();
-    asteroidBelt.addTo(planet);
-    for (let i = 0; i < 300; i++) {
-      const asteroidObj = [s1, s2, s3, s4][Math.ceil(Math.random() * 3)].clone(),
-        radius = asteroidMinRadius + Math.random() * (asteroidMaxRadius - asteroidMinRadius);
-
-      asteroidObj.g_({
-        radiusBottom: radius,
-        radiusTop: 0,
-        height: asteroidObj instanceof WHS.Cylinder ? radius * 2 : radius,
-        width: radius,
-        depth: radius,
-        radius
-      });
-      asteroidObj.material = mat[Math.floor(4 * Math.random())]; // Set custom THREE.Material to mesh.
-      // Asteroid data.
-      asteroidObj.data = {
-        distance: radius + i/20 + 50,
-        angle: Math.random() * Math.PI * 2
-      };
-      // Set position & rotation.
-      asteroidObj.position.x = Math.cos(asteroidObj.data.angle) * asteroidObj.data.distance;
-      asteroidObj.position.z = Math.sin(asteroidObj.data.angle) * asteroidObj.data.distance;
-      asteroidObj.position.y = -10 * Math.random() + 4;
-
-      asteroidObj.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
-      asteroidObj.addTo(asteroidBelt);
-    }
-  }
 }
 
+const planetsArr = [];
+for (let i = 0; i < planetCount; i++) {
+  planetsArr.push(generatePlanet(i));
+  // generateAsteroidBelt(planetsArr[i]);
+}
 
-// Animating rotating shapes around planet.
+const asteroidBelt1 = generateAsteroidBelt(planetsArr[0]);
+const tree1 = addTreeToPlanet(planetsArr[0]);
 const planetObjs = planets.children;
 
+// Animating rotating shapes around planet.
 const animation = new WHS.Loop(() => {
   for (let i = 0, max = planetObjs.length; i < max; i++) {
     const planetObj = planetObjs[i];
@@ -197,8 +205,6 @@ const animation = new WHS.Loop(() => {
 
 app.addLoop(animation);
 animation.start();
-// orbitModule.controls.minPolarAngle = 0;
-// orbitModule.controls.maxPolarAngle = 0;
 orbitModule.controls.minDistance = 900;
 orbitModule.controls.maxDistance = 1200;
 
