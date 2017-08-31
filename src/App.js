@@ -6,16 +6,22 @@ import SelectField from 'material-ui/SelectField';
 import TextField from 'material-ui/TextField';
 import MenuItem from 'material-ui/MenuItem';
 import classList from 'react-classlist-helper';
+import { solarSystem } from './solarSystem.js';
+
+// import {generateCrazyPlanet} from './index.js';
 
 const muiTheme = getMuiTheme({
   color: 'white'
 });
 
 class App extends Component {
-
   constructor() {
     super();
     this.state = {};
+  }
+
+  componentDidMount() {
+    solarSystem.init();
   }
 
   onCreateSystemClick() {
