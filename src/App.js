@@ -6,9 +6,8 @@ import SelectField from 'material-ui/SelectField';
 import TextField from 'material-ui/TextField';
 import MenuItem from 'material-ui/MenuItem';
 import classList from 'react-classlist-helper';
-import { solarSystem } from './solarSystem.js';
-
-// import {generateCrazyPlanet} from './index.js';
+import SolarSystem from './solarSystem.js';
+import _ from 'lodash';
 
 const muiTheme = getMuiTheme({
   color: 'white'
@@ -18,21 +17,74 @@ class App extends Component {
   constructor() {
     super();
     this.state = {};
+    this.solarSystem;
   }
 
   componentDidMount() {
-    solarSystem.init();
+    this.solarSystem = new SolarSystem();
+    const radiusMin = 190, // Min radius of the planet belt.
+      radiusMax = 300, // Max radius of the planet belt.
+      planetCount = 9, // Ammount of planets.
+      planetMinRadius = 20, // Min of planet radius.
+      planetMaxRadius = 50, // Max of planet radius.
+      asteroidMinRadius = 1,
+      asteroidMaxRadius = 3,
+      sunSize = 140; // Radius of sun
+
+    let starterProperties = {
+      radiusMin,
+      radiusMax,
+      planetMinRadius,
+      planetMaxRadius,
+      planetCount,
+      asteroidMaxRadius,
+      asteroidMinRadius,
+      sunSize
+    };
+
+    this.solarSystem.setProperties(starterProperties);
+    this.solarSystem.init();
   }
 
   onCreateSystemClick() {
     this.setState({createSystem: true})
   }
 
+  onGenerateNewSystem() {
+    this.setState({generateNewSystem: true});
+
+    const radiusMin = 190, // Min radius of the planet belt.
+      radiusMax = 300, // Max radius of the planet belt.
+      planetCount = 2, // Ammount of planets.
+      planetMinRadius = 20, // Min of planet radius.
+      planetMaxRadius = 50, // Max of planet radius.
+      asteroidMinRadius = 1,
+      asteroidMaxRadius = 3,
+      sunSize = 20; // Radius of sun
+
+
+
+    let starterProperties = {
+      name: 'Solar System Ray-1',
+      radiusMin,
+      radiusMax,
+      planetMinRadius,
+      planetMaxRadius,
+      planetCount,
+      asteroidMaxRadius,
+      asteroidMinRadius,
+      sunSize
+    };
+
+    this.solarSystem.setProperties(starterProperties);
+    this.solarSystem.generateCrazyPlanet();
+  }
+
   handleChange = (event, index, value) => this.setState({value});
   handleAnimalChange = (event, index, animalValue) => this.setState({animalValue});
 
   render() {
-    const { createSystem } = this.state;
+    const { createSystem, generateNewSystem } = this.state;
     const buttonClassMap = {
       'create-system-button': true,
       'hide': createSystem
@@ -40,7 +92,8 @@ class App extends Component {
 
     const menuClassMap = {
       'create-system-menu': true,
-      'show': createSystem
+      'show': createSystem && !generateNewSystem,
+      'hide': generateNewSystem
     };
 
     return (
@@ -88,7 +141,7 @@ class App extends Component {
                   <MenuItem value={5} primaryText="Narwhal" />
                 </SelectField>
               </MuiThemeProvider>
-              <div className='generate-system-button'>Create!</div>
+              <div className='generate-system-button' onClick={this.onGenerateNewSystem.bind(this)}>Create!</div>
           </div>
         </div>
       </div>
