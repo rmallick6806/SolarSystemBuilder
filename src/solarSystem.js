@@ -80,10 +80,10 @@ class SolarSystem {
 
     const asteroidBelt1 = this.generateAsteroidBelt(planetsArr[0]);
     const tree1 = this.addTreeToPlanet(planetsArr[0]);
-    const planetObjs = this.planets.children;
 
     // Animating rotating shapes around planet.
     this.animation = new WHS.Loop(() => {
+      const planetObjs = this.planets.children;
       for (let i = 0, max = planetObjs.length; i < max; i++) {
         const planetObj = planetObjs[i];
 
@@ -208,15 +208,22 @@ class SolarSystem {
     this.app.remove(this.space);
     this.space = new WHS.Group();
     this.space.addTo(this.app);
-    this.sun = star(this.properties.sunSize, colors.sun);
+    this.sun = star(this.properties.sunSize, this.properties.sunColor);
     this.sun.addTo(this.space);
 
-    let newPlanet = this.generatePlanet(0);
-    let newPlanet2 = this.generatePlanet(1);
-    this.generateAsteroidBelt(newPlanet);
-    this.addTreeToPlanet(newPlanet);
-    newPlanet.addTo(this.space);
-    newPlanet2.addTo(this.space);
+    this.space.remove(this.planets);
+    this.planets = new WHS.Group();
+    this.planets.addTo(this.space);
+
+    for (let i = 0; i < this.properties.planetCount; i++) {
+      this.properties.planetsArr[i].addTo(this.planets);
+    }
+
+    this.animation.start();
+  }
+
+  clearSolarSystem() {
+    this.app.remove(this.space);
   }
 }
 
