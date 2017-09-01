@@ -58,13 +58,13 @@ class App extends Component {
 
     this.setState({generateNewSystem: true});
 
-    const radiusMin = 190, // Min radius of the planet belt.
-      radiusMax = 300, // Max radius of the planet belt.
-      planetMinRadius = 20, // Min of planet radius.
-      planetMaxRadius = 50, // Max of planet radius.
-      asteroidMinRadius = 1,
-      asteroidMaxRadius = 3,
-      sunSize = 20; // Radius of sun
+    // const radiusMin = 190; // Min radius of the planet belt.
+    // const radiusMax = 300; // Max radius of the planet belt.
+    const planetMinRadius = 20; // Min of planet radius.
+    const planetMaxRadius = 50; // Max of planet radius.
+    const asteroidMinRadius = 1;
+    const asteroidMaxRadius = 3;
+    const sunSize = 20; // Radius of sun
 
     let planetCountDecider = {
       1: _.sample(_.range(15, 22)),
@@ -85,27 +85,27 @@ class App extends Component {
     let sunDecider = {
       1: {
         1: {
-          size: _.sample(_.range(40, 60, 5)),
+          size: _.sample(_.range(60, 90, 5)),
           color: colors.sun
         },
         2: {
-          size: _.sample(_.range(40, 60, 5)),
+          size: _.sample(_.range(60, 90, 5)),
           color: colors.sun
         },
         3: {
-          size: _.sample(_.range(40, 60, 5)),
+          size: _.sample(_.range(60, 90, 5)),
           color: colors.blue
         },
         4: {
-          size: _.sample(_.range(40, 60, 5)),
+          size: _.sample(_.range(60, 90, 5)),
           color: colors.blue
         },
         5: {
-          size: _.sample(_.range(40, 60, 5)),
+          size: _.sample(_.range(60, 90, 5)),
           color: colors.sun
         },
         6: {
-          size: _.sample(_.range(40, 60, 5)),
+          size: _.sample(_.range(60, 90, 5)),
           color: colors.blue
         }
       },
@@ -137,79 +137,79 @@ class App extends Component {
       },
       3: {
         1: {
-          size: _.sample(_.range(120, 160, 5)),
+          size: _.sample(_.range(120, 220, 5)),
           color: colors.sun
         },
         2: {
-          size: _.sample(_.range(120, 160, 5)),
+          size: _.sample(_.range(120, 220, 5)),
           color: colors.sun
         },
         3: {
-          size: _.sample(_.range(120, 160, 5)),
+          size: _.sample(_.range(120, 220, 5)),
           color: colors.blue
         },
         4: {
-          size: _.sample(_.range(120, 160, 5)),
+          size: _.sample(_.range(120, 220, 5)),
           color: colors.blue
         },
         5: {
-          size: _.sample(_.range(120, 160, 5)),
+          size: _.sample(_.range(120, 220, 5)),
           color: colors.sun
         },
         6: {
-          size: _.sample(_.range(120, 160, 5)),
+          size: _.sample(_.range(120, 220, 5)),
           color: colors.blue
         }
       },
       4: {
         1: {
-          size: _.sample(_.range(120, 170, 10)),
+          size: _.sample(_.range(220, 300, 10)),
           color: colors.red
         },
         2: {
-          size: _.sample(_.range(120, 170, 10)),
+          size: _.sample(_.range(220, 300, 10)),
           color: colors.red
         },
         3: {
-          size: _.sample(_.range(120, 170, 10)),
+          size: _.sample(_.range(220, 300, 10)),
           color: colors.sun
         },
         4: {
-          size: _.sample(_.range(120, 170, 10)),
+          size: _.sample(_.range(220, 300, 10)),
           color: colors.sun
         },
         5: {
-          size: _.sample(_.range(120, 170, 10)),
+          size: _.sample(_.range(220, 300, 10)),
           color: colors.red
         },
         6: {
-          size: _.sample(_.range(120, 170, 10)),
+          size: _.sample(_.range(220, 300, 10)),
           color: colors.sun
         }
       },
       5: {
         1: {
-          size: _.sample(_.range(180, 220, 5)),
+          size: _.sample(_.range(500, 600, 5)),
           color: colors.red
         },
         2: {
-          size: _.sample(_.range(180, 220, 5)),
+          size: _.sample(_.range(500, 600, 5)),
           color: colors.red
         },
         3: {
-          size: _.sample(_.range(180, 220, 5)),
+          size: _.sample(_.range(500, 600, 5)),
           color: colors.sun
         },
         4: {
-          size: _.sample(_.range(180, 220, 5)),
+          size: _.sample(_.range(500, 600, 5)),
           color: colors.sun
         },
         5: {
-          size: _.sample(_.range(180, 220, 5)),
+          size: _.sample(_.range(500, 600, 5)),
           color: colors.red
         },
         6: {
-          size: _.sample(_.range(180, 220, 5)),
+          size: _.sample(_.range(500, 600, 5)),
           color: colors.sun
         }
       }
@@ -219,14 +219,9 @@ class App extends Component {
     let homePlanetEnvironement = planetEnvironmentDecider[animalValue];
     let sun = sunDecider[value][animalValue];
     let planetsArr = []
-
-    for (let i = 0; i < planetCount; i++) {
-      planetsArr.push(this.solarSystem.generatePlanet(i));
-    }
-
-    console.log(sun, '!'), 10;
-
-    let starterProperties = {
+    let radiusMin = sun.size + 50;
+    let radiusMax = sun.size + 300;
+    let newProperties = {
       name: 'Solar System Ray-1',
       homePlanetEnvironement,
       planetsArr,
@@ -240,10 +235,21 @@ class App extends Component {
       sunSize: sun.size,
       sunColor: sun.color
     };
+    console.log(newProperties, 'first');
+    this.solarSystem.clearSolarSystem();
+    this.solarSystem.setProperties(newProperties);
 
-    this.solarSystem.setProperties(starterProperties);
+    for (let i = 0; i < planetCount; i++) {
+      planetsArr.push(this.solarSystem.generatePlanet(i));
+    }
+
+    newProperties = {
+      ...newProperties,
+      planetsArr
+    };
+    console.log(newProperties, 'second');
     this.solarSystem.generateCrazyPlanet();
-    this.setState({newSystem: starterProperties})
+    this.setState({newSystem: newProperties})
   }
 
   loadSystem(properties) {
