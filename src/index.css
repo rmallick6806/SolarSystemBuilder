@@ -3,7 +3,7 @@
 
 @keyframes systemNameSlideUp {
   from {top: 50%;}
-  to {top: 100px;}
+  to {top: 70px;}
 }
 
 body {
@@ -35,7 +35,7 @@ body {
   left: 0;
   right: 0;
   margin: auto;
-  top: 100px;
+  top: 70px;
   animation-name: systemNameSlideUp;
   animation-duration: 3s;
   /*animation-timing-function: ease-in;*/

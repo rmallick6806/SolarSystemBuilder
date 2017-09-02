@@ -69,7 +69,8 @@ class App extends Component {
   }
 
   onGenerateNewSystem(properties) {
-    const {animalValue, value} = this.state;
+    const {animalValue, value, systemName} = this.state;
+    const nameBox = this.refs.nameBox;
     let el = document.getElementById('mainHeader');
     let smallEl = document.getElementById('header');
     let creationMenu = document.getElementById('creationMenu');
@@ -247,7 +248,7 @@ class App extends Component {
     let radiusMin = sun.size + 50;
     let radiusMax = sun.size + 300;
     let newProperties = {
-      name: 'Ray-1',
+      name: systemName || 'Ray-1',
       homePlanetEnvironement,
       planetsArr,
       radiusMin,
@@ -283,6 +284,7 @@ class App extends Component {
   }
 
   handleChange = (event, index, value) => this.setState({value});
+  handleNameChange = (event, systemName) => this.setState({systemName});
   handleAnimalChange = (event, index, animalValue) => this.setState({animalValue});
 
   getSolarSystemName() {
@@ -311,7 +313,7 @@ class App extends Component {
       <div className="App">
         <div className='main-container' id='mainContainer'>
           <div className='header' id='header'>Capital One Presents...</div>
-          <div className='main-header' id='mainHeader'> The Galaxy </div>
+          <div className='main-header' id='mainHeader'> Boulder Galaxy </div>
           <button onClick={() => this.solarSystem.clearSolarSystem()}>Click to Test</button>
           <button onClick={() => this.loadSystem(this.state.newSystem)}>Load Solar System</button>
           {loading ? <div className='loading-menu'>Generating Your Solar System</div> : null}
@@ -321,7 +323,7 @@ class App extends Component {
               <div>Create Your Own System</div>
               <h5> Name your solar system </h5>
               <MuiThemeProvider muiTheme={muiTheme}>
-                <TextField hintText="Enter a name..."/>
+                <TextField hintText="Enter a name..." ref='nameBox' value={this.state.systemName} onChange={this.handleNameChange}/>
               </MuiThemeProvider>
 
               <h5> How do you feel right now? </h5>
