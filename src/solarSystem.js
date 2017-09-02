@@ -4,6 +4,7 @@ import { colors } from './colors.js';
 import * as Lights from './lights.js';
 import { star, planetShape1, planetShape2, planetShape3, planetShape4 } from './spaceObjects.js';
 import _ from 'lodash';
+require('three-fbx-loader')(THREE);
 
 class SolarSystem {
   constructor() {
@@ -62,7 +63,6 @@ class SolarSystem {
     this.s3 = planetShape3(this.dynamicGeometry, this.material)
     this.s4 = planetShape4(this.dynamicGeometry, this.material)
 
-
     this.space.addTo(this.app);
     this.space.rotation.z = Math.PI / 12;
     this.planets.addTo(this.space);
@@ -76,6 +76,15 @@ class SolarSystem {
     //   distance: 20000,
     //   position: [100, 200, 200]
     // }).addTo(this.app);
+
+    // let loader  = new THREE.JSONLoader();
+    // loader.load(
+    //   './MainTreesSet/TreeStack.json',
+    //   function(geometry, materials) {
+    //     this.app.add(mesh);
+    //   }
+    // );
+
   }
 
   setProperties(properties) {
@@ -103,18 +112,48 @@ class SolarSystem {
         planetObj.data.angle += 0.009 / (planetObj.data.distance / this.properties.radiusMax);
 
         planetObj.position.x = (Math.cos(planetObj.data.angle) * planetObj.data.distance);
-        planetObj.position.z = (Math.sin(planetObj.data.angle) * planetObj.data.distance);
+        planetObj.position.z = (Math.sin(planetObj.data.angle) * planetObj.data.distance);        
 
         // planetObj.rotation.x += 1 / 60;
         planetObj.rotation.y += 2 / 30;
+        if (this.asteroidBelt) {
+          this.asteroidBelt.rotation.y += 2/500;
+        }
       }
-      this.sun.rotation.y += 0.005;
+      this.sun.rotation.y -= 0.005;
     });
 
     this.app.addLoop(this.animation);
     this.animation.start();
     this.orbitModule.controls.minDistance = 90;
     this.orbitModule.controls.maxDistance = Infinity;
+    // let json = JSON.parse('./MainTreesSet/fox.json');
+    //
+    // json = json.replace(/\\n/g, "\\n")
+    //            .replace(/\\'/g, "\\'")
+    //            .replace(/\\"/g, '\\"')
+    //            .replace(/\\&/g, "\\&")
+    //            .replace(/\\r/g, "\\r")
+    //            .replace(/\\t/g, "\\t")
+    //            .replace(/\\b/g, "\\b")
+    //            .replace(/\\f/g, "\\f");
+    // // remove non-printable and other non-valid JSON chars
+    // json = json.replace(/[\u0000-\u0019]+/g,"");
+    // var finalJson = JSON.parse(json);
+    //
+    // new WHS.Importer({
+    //   loader: new THREE.JSONLoader(),
+    //   url: finalJson,
+    //   geometry: {
+    //     height: 2*100,
+    //     radius: 2*100,
+    //     width: 2*100,
+    //     scale: 100
+    //   },
+    //   // useCustomMaterial: true,
+    //   material: new THREE.MeshNormalMaterial(),
+    //   position: [10, 10, 10]
+    // }).addTo(this.app);
 
     this.app.start()
   }
@@ -215,11 +254,11 @@ class SolarSystem {
         angle: Math.random() * Math.PI * 2
       };
       // Set position & rotation.
-      asteroidObj.position.x = Math.cos(asteroidObj.data.angle) * asteroidObj.data.distance;
+      asteroidObj.position.x = -Math.cos(asteroidObj.data.angle) * asteroidObj.data.distance;
       asteroidObj.position.z = Math.sin(asteroidObj.data.angle) * asteroidObj.data.distance;
       asteroidObj.position.y = -10 * Math.random() + 4;
 
-      asteroidObj.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+      // asteroidObj.rotation.set(-Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
       asteroidObj.addTo(this.solarAsteroidBelt);
     }
   }
@@ -232,7 +271,7 @@ class SolarSystem {
     const cone = new WHS.Cone({
       geometry: {
         radius: scale,
-        height: scale*2
+        height: scale * 2
       },
 
       material: new THREE.MeshPhongMaterial({

@@ -11,6 +11,7 @@
     "react": "^15.6.1",
     "react-classlist-helper": "^1.3.1",
     "react-dom": "^15.6.1",
+    "three-fbx-loader": "^1.0.2",
     "whs": "^2.1.6"
   },
   "scripts": {
