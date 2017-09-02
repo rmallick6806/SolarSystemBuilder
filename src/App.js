@@ -12,6 +12,8 @@ import { colors } from './colors.js';
 import * as WHS from 'whs';
 import * as THREE from 'three';
 
+import {TweenMax, Linear, TimelineLite} from "gsap";
+
 const muiTheme = getMuiTheme({
   color: 'white'
 });
@@ -24,6 +26,19 @@ class App extends Component {
   }
 
   componentDidMount() {
+    let el = document.getElementById('mainHeader');
+    let smallEl = document.getElementById('header');
+    let pressHereButton = document.getElementById('pressHereButton');
+
+    TweenMax.set(el, {opacity: 0});
+    TweenMax.set(smallEl, {opacity: 0});
+    TweenMax.set(pressHereButton, {bottom: -300});
+
+    TweenMax.to(el, 3, {opacity: 1, delay: 3});
+    TweenMax.to(smallEl, 3, {opacity: 1, top: '50%'});
+    TweenMax.to(pressHereButton, 3, {bottom: 60, delay: 4});
+
+
     this.solarSystem = new SolarSystem();
     const radiusMin = 190, // Min radius of the planet belt.
       radiusMax = 300, // Max radius of the planet belt.
@@ -55,8 +70,18 @@ class App extends Component {
 
   onGenerateNewSystem(properties) {
     const {animalValue, value} = this.state;
+    let el = document.getElementById('mainHeader');
+    let smallEl = document.getElementById('header');
+    let creationMenu = document.getElementById('creationMenu');
 
-    this.setState({generateNewSystem: true});
+    TweenMax.set(el, {display: 'none'});
+    TweenMax.set(smallEl, {display: 'none'});
+    TweenMax.set(creationMenu, {display: 'none'});
+
+    this.setState({loading: true});
+
+    _.delay(() => this.setState({generateNewSystem: true, loading: false}), 2000);
+    // this.setState({generateNewSystem: true});
 
     // const radiusMin = 190; // Min radius of the planet belt.
     // const radiusMax = 300; // Max radius of the planet belt.
@@ -222,7 +247,7 @@ class App extends Component {
     let radiusMin = sun.size + 50;
     let radiusMax = sun.size + 300;
     let newProperties = {
-      name: 'Solar System Ray-1',
+      name: 'Ray-1',
       homePlanetEnvironement,
       planetsArr,
       radiusMin,
@@ -235,7 +260,7 @@ class App extends Component {
       sunSize: sun.size,
       sunColor: sun.color
     };
-    console.log(newProperties, 'first');
+
     this.solarSystem.clearSolarSystem();
     this.solarSystem.setProperties(newProperties);
 
@@ -247,7 +272,7 @@ class App extends Component {
       ...newProperties,
       planetsArr
     };
-    console.log(newProperties, 'second');
+
     this.solarSystem.generateCrazyPlanet();
     this.setState({newSystem: newProperties})
   }
@@ -260,8 +285,17 @@ class App extends Component {
   handleChange = (event, index, value) => this.setState({value});
   handleAnimalChange = (event, index, animalValue) => this.setState({animalValue});
 
+  getSolarSystemName() {
+    return (
+      <div id='systemNameContainer'>
+        <div className='welcome-to' id='header'>Welcome to</div>
+        <div className='system-name' id='mainHeader'> System {this.state.newSystem.name} </div>
+      </div>
+    );
+  }
+
   render() {
-    const { createSystem, generateNewSystem } = this.state;
+    const { createSystem, generateNewSystem, loading } = this.state;
     const buttonClassMap = {
       'create-system-button': true,
       'hide': createSystem
@@ -270,19 +304,20 @@ class App extends Component {
     const menuClassMap = {
       'create-system-menu': true,
       'show': createSystem && !generateNewSystem,
-      'hide': generateNewSystem
+      'hide': generateNewSystem || loading
     };
 
     return (
       <div className="App">
         <div className='main-container' id='mainContainer'>
-          <div className='header'>Capital One Presents...
-            <div> The Universe </div>
-          </div>
+          <div className='header' id='header'>Capital One Presents...</div>
+          <div className='main-header' id='mainHeader'> The Galaxy </div>
           <button onClick={() => this.solarSystem.clearSolarSystem()}>Click to Test</button>
           <button onClick={() => this.loadSystem(this.state.newSystem)}>Load Solar System</button>
-          <div className={classList(buttonClassMap)} onClick={this.onCreateSystemClick.bind(this)}>Press Here to Create Your Own System</div>
-          <div className={classList(menuClassMap)}>
+          {loading ? <div className='loading-menu'>Generating Your Solar System</div> : null}
+          {generateNewSystem && !loading ? this.getSolarSystemName() : null}
+          <div className={classList(buttonClassMap)} onClick={this.onCreateSystemClick.bind(this)} id='pressHereButton'>Press Here to Create Your Own System</div>
+          <div className={classList(menuClassMap)} id='creationMenu'>
               <div>Create Your Own System</div>
               <h5> Name your solar system </h5>
               <MuiThemeProvider muiTheme={muiTheme}>

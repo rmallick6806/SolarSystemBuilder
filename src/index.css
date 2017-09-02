@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css?family=Pacifico');
 @import url('https://fonts.googleapis.com/css?family=Josefin+Sans');
 
+@keyframes systemNameSlideUp {
+  from {top: 50%;}
+  to {top: 100px;}
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -16,14 +21,74 @@ body {
   left: 0;
   right: 0;
   margin: auto;
-  top: 60px;
+  top: 50%;
   text-shadow: 2px 2px black;
   font-family: Josefin Sans, serif;
 }
 
-.header div {
-  font-family: Pacifico, cursive;
+#systemNameContainer {
+  position: absolute;
+  background: transparent;
   font-size: 72px;
+  z-index: 1;
+  color: white;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 100px;
+  animation-name: systemNameSlideUp;
+  animation-duration: 3s;
+  /*animation-timing-function: ease-in;*/
+}
+
+.welcome-to {
+  font-size: 72px;
+  text-shadow: 2px 2px black;
+  font-family: Pacifico, cursive;
+}
+
+.system-name {
+  text-shadow: 2px 2px black;
+  font-family: Josefin Sans, serif;
+  font-size: 52px;
+}
+
+.main-header {
+  position: absolute;
+  background: transparent;
+  font-size: 22px;
+  z-index: 1;
+  color: white;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 50%;
+  text-shadow: 2px 2px black;
+
+  font-family: Pacifico, cursive;
+  font-size: 102px;
+}
+
+.loading-menu {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 500px;
+  color: white;
+  text-align: left;
+  background: #f2c66d;
+  font-family: Josefin Sans, serif;
+  padding: 30px 30px;
+  font-size: 28px;
+  box-shadow: 1px 1px 6px 0px black;
+  text-shadow: 1px 1px grey;
+  border: 10px dashed #f07464;
+  border-radius: 5px;
+
+
 }
 
 .create-system-button {

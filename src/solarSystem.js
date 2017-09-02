@@ -100,8 +100,13 @@ class SolarSystem {
       planetsArr.push(this.generatePlanet(i));
     }
 
-    const asteroidBelt1 = this.generateAsteroidBelt(planetsArr[0]);
+    const asteroidBelt1 = this.generateAsteroidBelt(planetsArr[3]);
     const tree1 = this.addTreeToPlanet(planetsArr[0]);
+
+    let lastPlanet = _.last(planetsArr);
+    let lastPlanetDistance = lastPlanet.data.distance;
+
+    this.generateSolarAsteroidBelt(this.sun, 3, 6, lastPlanetDistance + 100);
 
     // Animating rotating shapes around planet.
     this.animation = new WHS.Loop(() => {
@@ -112,7 +117,7 @@ class SolarSystem {
         planetObj.data.angle += 0.009 / (planetObj.data.distance / this.properties.radiusMax);
 
         planetObj.position.x = (Math.cos(planetObj.data.angle) * planetObj.data.distance);
-        planetObj.position.z = (Math.sin(planetObj.data.angle) * planetObj.data.distance);        
+        planetObj.position.z = (Math.sin(planetObj.data.angle) * planetObj.data.distance);
 
         // planetObj.rotation.x += 1 / 60;
         planetObj.rotation.y += 2 / 30;
