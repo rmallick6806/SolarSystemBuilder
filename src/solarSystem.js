@@ -160,6 +160,19 @@ class SolarSystem {
     //   position: [10, 10, 10]
     // }).addTo(this.app);
 
+    // new WHS.Importer({
+    //   loader: new THREE.JSONLoader(),
+    //   url: './village_assets/demo1.json',
+    //   geometry: {
+    //       height: 1000*5,
+    //       width: 1000*5
+    //     },
+    //   parser(geometry, material) { // data from loader
+    //     return new THREE.Mesh(geometry, material); // should return your .native (mesh in this case)
+    //   },
+    //   position: [0, 100, 0]
+    // }).addTo(this.app);
+
     this.app.start()
   }
 
