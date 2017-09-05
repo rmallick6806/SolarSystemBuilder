@@ -4,7 +4,9 @@ import { colors } from './colors.js';
 import * as Lights from './lights.js';
 import { star, planetShape1, planetShape2, planetShape3, planetShape4 } from './spaceObjects.js';
 import _ from 'lodash';
-require('three-fbx-loader')(THREE);
+
+import GeometryUtils from './GeometryUtils.js';
+
 
 class SolarSystem {
   constructor() {
@@ -77,14 +79,6 @@ class SolarSystem {
     //   position: [100, 200, 200]
     // }).addTo(this.app);
 
-    // let loader  = new THREE.JSONLoader();
-    // loader.load(
-    //   './MainTreesSet/TreeStack.json',
-    //   function(geometry, materials) {
-    //     this.app.add(mesh);
-    //   }
-    // );
-
   }
 
   setProperties(properties) {
@@ -102,6 +96,7 @@ class SolarSystem {
 
     const asteroidBelt1 = this.generateAsteroidBelt(planetsArr[3]);
     const tree1 = this.addTreeToPlanet(planetsArr[0]);
+    _.delay(() => this.addCityToPlanet(this.sun), 0);
 
     let lastPlanet = _.last(planetsArr);
     let lastPlanetDistance = lastPlanet.data.distance;
@@ -132,40 +127,17 @@ class SolarSystem {
     this.animation.start();
     this.orbitModule.controls.minDistance = 90;
     this.orbitModule.controls.maxDistance = Infinity;
-    // let json = JSON.parse('./MainTreesSet/fox.json');
-    //
-    // json = json.replace(/\\n/g, "\\n")
-    //            .replace(/\\'/g, "\\'")
-    //            .replace(/\\"/g, '\\"')
-    //            .replace(/\\&/g, "\\&")
-    //            .replace(/\\r/g, "\\r")
-    //            .replace(/\\t/g, "\\t")
-    //            .replace(/\\b/g, "\\b")
-    //            .replace(/\\f/g, "\\f");
-    // // remove non-printable and other non-valid JSON chars
-    // json = json.replace(/[\u0000-\u0019]+/g,"");
-    // var finalJson = JSON.parse(json);
-    //
-    // new WHS.Importer({
-    //   loader: new THREE.JSONLoader(),
-    //   url: finalJson,
-    //   geometry: {
-    //     height: 2*100,
-    //     radius: 2*100,
-    //     width: 2*100,
-    //     scale: 100
-    //   },
-    //   // useCustomMaterial: true,
-    //   material: new THREE.MeshNormalMaterial(),
-    //   position: [10, 10, 10]
-    // }).addTo(this.app);
 
+
+
+    // const path = './assets/demo1.json';
     // new WHS.Importer({
     //   loader: new THREE.JSONLoader(),
-    //   url: './village_assets/demo1.json',
+    //   url: path,
     //   geometry: {
-    //       height: 1000*5,
-    //       width: 1000*5
+    //       height: 10000*5,
+    //       width: 10000*5,
+    //       radius: 10000*5
     //     },
     //   parser(geometry, material) { // data from loader
     //     return new THREE.Mesh(geometry, material); // should return your .native (mesh in this case)
@@ -311,6 +283,66 @@ class SolarSystem {
     group.addTo(planet);
   }
 
+  addCityToPlanet(planet) {
+    const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
+    this.app.get('scene').add(normalsHelper);
+    // Cone
+    const scale = 2;
+    const cube = new WHS.Box({
+      geometry: {
+        height: scale * 4,
+        width: scale * 2,
+        depth: scale * 2
+      },
+
+      material: new THREE.MeshPhongMaterial({
+        color: colors.green,
+      }),
+      position: [0, scale, 0]
+    });
+    const cube2 = new WHS.Box({
+      geometry: {
+        height: scale * 10,
+        width: scale * 2,
+        depth: scale * 20
+      },
+
+      material: new THREE.MeshPhongMaterial({
+        color: colors.green,
+      }),
+      position: [0, scale, 0]
+    });
+    const upVec = new THREE.Vector3(0, 1, 0);
+    const sg = planet.geometry;
+    sg.computeVertexNormals(); // compute normals for each vertex
+    const face = sg.faces[0]; // the actual face
+
+    const point = sg.vertices[face.a]; // selected vertice (can be a, b or c)
+
+    const pointNormal = face.vertexNormals[0]; // it's normal (a=0)
+    const quat = new THREE.Quaternion().setFromUnitVectors(upVec, pointNormal);
+
+    const randomSpherePoint = function(x0,y0,z0,radius){
+     var u = Math.random();
+     var v = Math.random();
+     var theta = 2 * Math.PI * u;
+     var phi = Math.acos(2 * v - 1);
+     var x = x0 + (radius * Math.sin(phi) * Math.cos(theta));
+     var y = y0 + (radius * Math.sin(phi) * Math.sin(theta));
+     var z = z0 + (radius * Math.cos(phi));
+     return new THREE.Vector3(x,y,z);
+    };
+
+    let newerPoint = randomSpherePoint(sg.boundingSphere.center.x, sg.boundingSphere.center.y, sg.boundingSphere.center.z, sg.boundingSphere.radius)
+
+    let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 2);
+    console.log(newestPoint[0]);
+    const group = new WHS.Group(cube); // = Object3D in Three.js
+    group.position.copy(newestPoint[0]);
+    group.quaternion.copy(quat);
+    group.addTo(planet);
+  }
+
   generateCrazyPlanet() {
     this.app.remove(this.space);
     this.space = new WHS.Group();
@@ -328,6 +360,7 @@ class SolarSystem {
 
     this.generateAsteroidBelt(this.properties.planetsArr[3]);
     this.generateAsteroidBelt(this.properties.planetsArr[3], 30, 'blue');
+    this.addCityToPlanet(this.properties.planetsArr[3]);
 
     let lastPlanet = _.last(this.properties.planetsArr);
     let lastPlanetDistance = lastPlanet.data.distance;
