@@ -42,6 +42,7 @@ class SolarSystem {
     ]);
     this.space = new WHS.Group();
     this.planets = new WHS.Group();
+
     this.dynamicGeometry = new WHS.DynamicGeometryModule();
     this.material = new THREE.MeshStandardMaterial({
       shading: THREE.FlatShading,
@@ -96,7 +97,8 @@ class SolarSystem {
 
     const asteroidBelt1 = this.generateAsteroidBelt(planetsArr[3]);
     const tree1 = this.addTreeToPlanet(planetsArr[0]);
-    _.delay(() => this.addCityToPlanet(this.sun), 0);
+    const moon = this.generateMoon(planetsArr[1], false, 0);
+    const moon2 = this.generateMoon(planetsArr[1], false, 20);
 
     let lastPlanet = _.last(planetsArr);
     let lastPlanetDistance = lastPlanet.data.distance;
@@ -119,16 +121,26 @@ class SolarSystem {
         if (this.asteroidBelt) {
           this.asteroidBelt.rotation.y += 2/500;
         }
+
+        if (this.moons) {
+          this.moons.rotation.x += 2/500;
+        }
+        // this.camera.position.set(planetObjs[3].position.x + 200, planetObjs[3].position.y + 200, planetObjs[3].position.z + 200);
       }
+
       this.sun.rotation.y -= 0.005;
+    });
+
+    this.cameraAnimation = new WHS.Loop(() => {
+      this.camera.position.set(planetsArr[3].position.x + 300 , planetsArr[3].position.y + 300, planetsArr[3].position.z + 300);
     });
 
     this.app.addLoop(this.animation);
     this.animation.start();
+    this.app.addLoop(this.cameraAnimation);
+    this.cameraAnimation.start();
     this.orbitModule.controls.minDistance = 90;
     this.orbitModule.controls.maxDistance = Infinity;
-
-
 
     // const path = './assets/demo1.json';
     // new WHS.Importer({
@@ -148,7 +160,7 @@ class SolarSystem {
     this.app.start()
   }
 
-  generatePlanet(i) {
+  generatePlanet(i, homePlanet) {
     const planet = [this.s1, this.s1, this.s4, this.s1][Math.ceil(Math.random() * 3)].clone(),
       radius = this.properties.planetMinRadius + Math.random() * (this.properties.planetMaxRadius - this.properties.planetMinRadius);
 
@@ -166,23 +178,80 @@ class SolarSystem {
     // Planet data
     planet.data = {
       distance: this.properties.radiusMin + i * (this.properties.radiusMax - this.properties.radiusMin),
-      angle: Math.random() * Math.PI * 2
+      angle: Math.random() * Math.PI * 2,
+      homePlanet: homePlanet
     };
 
     // Set position & rotation.
     planet.position.x = Math.cos(planet.data.angle) * planet.data.distance;
-    planet.position.z = Math.sin(planet.data.angle) * planet.data.distance;
+    // planet.position.z = Math.sin(planet.data.angle) * planet.data.distance;
     planet.position.y = -10 * Math.random() + 4;
 
     planet.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
 
     this.mouse.track(planet);
     planet.on('click', () => {
-      this.camera.position.set(planet.position.x + 10, planet.position.y, planet.position.z);
-      this.animation.stop();
+    	// camera.position.x = cameraOffset.x;
+    	// camera.position.y = cameraOffset.y;
+    	// camera.position.z = cameraOffset.z;
+
+
+      this.cameraAnimation = new WHS.Loop(() => {
+
+        var relativeCameraOffset = new THREE.Vector3(10,50,200);
+      	var cameraOffset = relativeCameraOffset.applyMatrix4( planet.native.matrixWorld );
+        //
+        // // this.camera.position.x = cameraOffset.x;
+        // this.camera.position.y = cameraOffset.y;
+        this.camera.position.z = cameraOffset.z;
+
+        this.camera.native.lookAt(planet.position);
+        this.camera.native.zoom = 2000;
+        // this.camera.position.set(planet.position.x + 100, planet.position.y + 100, planet.position.z + 100);
+      });
+
+      this.app.addLoop(this.cameraAnimation);
+      this.cameraAnimation.start();
+
     });
     planet.addTo(this.planets);
     return planet;
+  }
+
+
+  generateMoon(planet, homePlanet, extraDistance = 0) {
+    this.moons = new WHS.Group();
+    this.moons.addTo(planet);
+    const moon = [this.s1, this.s1, this.s4, this.s1][Math.ceil(Math.random() * 3)].clone(),
+      radius = this.properties.moonMinRadius + Math.random() * (this.properties.moonMaxRadius - this.properties.moonMinRadius);
+
+    moon.g_({
+      radiusBottom: radius,
+      radiusTop: 0,
+      height: moon instanceof WHS.Cylinder ? radius * 2 : radius,
+      width: radius,
+      depth: radius,
+      radius
+    });
+
+    moon.material = this.mat[Math.floor(4 * Math.random())]; // Set custom THREE.Material to mesh.
+
+    // Planet data
+    moon.data = {
+      distance: radius + extraDistance + 40,
+      angle: Math.random() * Math.PI * 2,
+      homePlanet: homePlanet
+    };
+
+    // Set position & rotation.
+    moon.position.y = Math.cos(moon.data.angle) * moon.data.distance;
+    moon.position.z = Math.sin(moon.data.angle) * moon.data.distance;
+    moon.position.x = 0;
+
+    moon.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+
+    moon.addTo(this.moons);
+    return moon;
   }
 
   generateAsteroidBelt(planet, extraDistance = 0, forceColor) {
@@ -290,13 +359,13 @@ class SolarSystem {
     const scale = 2;
     const cube = new WHS.Box({
       geometry: {
-        height: scale * 4,
-        width: scale * 2,
-        depth: scale * 2
+        height: scale * 0.5,
+        width: scale * 0.5,
+        depth: scale * 0.5
       },
 
       material: new THREE.MeshPhongMaterial({
-        color: colors.green,
+        color: colors.grey,
       }),
       position: [0, scale, 0]
     });
@@ -320,25 +389,13 @@ class SolarSystem {
     const point = sg.vertices[face.a]; // selected vertice (can be a, b or c)
 
     const pointNormal = face.vertexNormals[0]; // it's normal (a=0)
-    const quat = new THREE.Quaternion().setFromUnitVectors(upVec, pointNormal);
-
-    const randomSpherePoint = function(x0,y0,z0,radius){
-     var u = Math.random();
-     var v = Math.random();
-     var theta = 2 * Math.PI * u;
-     var phi = Math.acos(2 * v - 1);
-     var x = x0 + (radius * Math.sin(phi) * Math.cos(theta));
-     var y = y0 + (radius * Math.sin(phi) * Math.sin(theta));
-     var z = z0 + (radius * Math.cos(phi));
-     return new THREE.Vector3(x,y,z);
-    };
-
-    let newerPoint = randomSpherePoint(sg.boundingSphere.center.x, sg.boundingSphere.center.y, sg.boundingSphere.center.z, sg.boundingSphere.radius)
+    const faceNormal = face.normal;
+    const quat = new THREE.Quaternion().setFromUnitVectors(upVec, faceNormal);
 
     let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 2);
-    console.log(newestPoint[0]);
+
     const group = new WHS.Group(cube); // = Object3D in Three.js
-    group.position.copy(newestPoint[0]);
+    group.position.copy(_.sample(newestPoint));
     group.quaternion.copy(quat);
     group.addTo(planet);
   }
@@ -354,13 +411,11 @@ class SolarSystem {
     this.planets = new WHS.Group();
     this.planets.addTo(this.space);
 
+
     for (let i = 0; i < this.properties.planetCount; i++) {
       this.properties.planetsArr[i].addTo(this.planets);
     }
-
-    this.generateAsteroidBelt(this.properties.planetsArr[3]);
-    this.generateAsteroidBelt(this.properties.planetsArr[3], 30, 'blue');
-    this.addCityToPlanet(this.properties.planetsArr[3]);
+    // this.addCityToPlanet(this.properties.planetsArr[3]);
 
     let lastPlanet = _.last(this.properties.planetsArr);
     let lastPlanetDistance = lastPlanet.data.distance;

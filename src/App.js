@@ -47,7 +47,9 @@ class App extends Component {
       planetMaxRadius = 50, // Max of planet radius.
       asteroidMinRadius = 1,
       asteroidMaxRadius = 3,
-      sunSize = 140; // Radius of sun
+      sunSize = 140, // Radius of sun
+      moonMinRadius = 5,
+      moonMaxRadius = 8;
 
     let starterProperties = {
       radiusMin,
@@ -57,6 +59,8 @@ class App extends Component {
       planetCount,
       asteroidMaxRadius,
       asteroidMinRadius,
+      moonMaxRadius,
+      moonMinRadius,
       sunSize
     };
 
@@ -247,6 +251,9 @@ class App extends Component {
     let planetsArr = []
     let radiusMin = sun.size + 50;
     let radiusMax = sun.size + 300;
+    let moonMinRadius = 5;
+    let moonMaxRadius = 8;
+
     let newProperties = {
       name: systemName || 'Ray-1',
       homePlanetEnvironement,
@@ -258,6 +265,8 @@ class App extends Component {
       planetCount,
       asteroidMaxRadius,
       asteroidMinRadius,
+      moonMaxRadius,
+      moonMinRadius,
       sunSize: sun.size,
       sunColor: sun.color
     };
@@ -265,13 +274,72 @@ class App extends Component {
     this.solarSystem.clearSolarSystem();
     this.solarSystem.setProperties(newProperties);
 
-    for (let i = 0; i < planetCount; i++) {
-      planetsArr.push(this.solarSystem.generatePlanet(i));
+    const getRandomInt = function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    //
+    const homePlanetInt = getRandomInt(2, planetCount);
+    const asteroidBeltInt = getRandomInt(1, 3);
+    const asteroidBeltPlanetArr = [];
+    const moonInt = getRandomInt(1, planetCount - 2);
+    const moonPlanetsArr = [];
+    const diceRoll = getRandomInt(1, 20);
+
+    const planetCountArr = _.range(2, planetCount);
+    const planetCountArrForMoons = _.range(2, planetCount);
+
+    for (let j = 0; j < planetCount; j++) {
+      if (homePlanetInt) {
+        planetsArr.push(this.solarSystem.generatePlanet(j, true));
+      } else {
+        planetsArr.push(this.solarSystem.generatePlanet(j));
+      }
+    }
+
+    for (let i = 0; i < asteroidBeltInt; i++) {
+      const planetNum = _.sample(planetCountArr);
+      _.pull(planetCountArr, planetNum)
+      const diceRoll = getRandomInt(1, 20);
+      const rings = (diceRoll >= 15) ? 2 : 1;
+      asteroidBeltPlanetArr.push({id: planetNum, rings: rings});
+    };
+
+    for (let k = 0; k < asteroidBeltPlanetArr.length; k++) {
+      const planet = asteroidBeltPlanetArr[k];
+      this.solarSystem.generateAsteroidBelt(planetsArr[planet.id]);
+      if (planet.rings === 2) {
+        this.solarSystem.generateAsteroidBelt(planetsArr[planet.id], 30, 'blue');
+      }
+    }
+
+    for (let p = 0; p < moonInt; p++) {
+      const planetNum = _.sample(planetCountArrForMoons);
+      const diceRoll = getRandomInt(1, 20);
+      _.pull(planetCountArrForMoons, planetNum)
+      let moons = 1;
+      moons = (diceRoll >= 12) ? moons + 1 : moons + 0;
+      moons = (diceRoll >= 15) ?  moons + 1 : moons + 0;
+      moons = (diceRoll >= 18) ?  moons + 1 : moons + 0;
+
+      moonPlanetsArr.push({id: planetNum, moons: moons});
+    };
+
+    for (let h = 0; h < moonPlanetsArr.length; h++) {
+      const planet = moonPlanetsArr[h];
+      this.solarSystem.generateMoon(planetsArr[planet.id], false, 0);
+      if (planet.moons > 2) {
+        this.solarSystem.generateMoon(planetsArr[planet.id], false, 40);
+      }
+      if (planet.moons >= 3) {
+        this.solarSystem.generateMoon(planetsArr[planet.id], false, 60);
+      }
     }
 
     newProperties = {
       ...newProperties,
-      planetsArr
+      planetsArr,
+      asteroidBeltPlanetArr,
+      moonPlanetsArr
     };
 
     this.solarSystem.generateCrazyPlanet();

@@ -1,7 +1,3 @@
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- */
 import * as THREE from 'three';
 
 const GeometryUtils = {
@@ -26,10 +22,6 @@ const GeometryUtils = {
 		geometry1.merge( geometry2, matrix, materialIndexOffset );
 
 	},
-
-	// Get random point in triangle (via barycentric coordinates)
-	// 	(uniform distribution)
-	// 	http://www.cgafaq.info/wiki/Random_Point_In_Triangle
 
 	randomPointInTriangle: function () {
 
