@@ -105,7 +105,7 @@ class App extends Component {
     }
 
     let planetEnvironmentDecider = {
-      1: 'MIX',
+      1: 'MULTI BIOME',
       2: 'JUNGLE',
       3: 'FOREST',
       4: 'ICE',
@@ -116,131 +116,161 @@ class App extends Component {
       1: {
         1: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Young Sun-like Star'
         },
         2: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Young Sun-like Star'
         },
         3: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.blue
+          color: colors.blue,
+          type: 'Young Massive Blue Star'
         },
         4: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.blue
+          color: colors.blue,
+          type: 'Young Massive Blue Star'
         },
         5: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Young Sun-like Star'
         },
         6: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.blue
+          color: colors.blue,
+          type: 'Young Massive Blue Star'
         }
       },
       2: {
         1: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Young Sun-like Star'
         },
         2: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Young Sun-like Star'
         },
         3: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.blue
+          color: colors.blue,
+          type: 'Massive Blue Star'
         },
         4: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.blue
+          color: colors.blue,
+          type: 'Massive Blue Star'
         },
         5: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Young Sun-like Star'
         },
         6: {
           size: _.sample(_.range(60, 90, 5)),
-          color: colors.blue
+          color: colors.blue,
+          type: 'Massive Blue Star'
         }
       },
       3: {
         1: {
           size: _.sample(_.range(120, 220, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Average Sun-like Star'
         },
         2: {
           size: _.sample(_.range(120, 220, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Average Sun-like Star'
         },
         3: {
           size: _.sample(_.range(120, 220, 5)),
-          color: colors.blue
+          color: colors.blue,
+          type: 'Massive Blue Star'
         },
         4: {
           size: _.sample(_.range(120, 220, 5)),
-          color: colors.blue
+          color: colors.blue,
+          type: 'Massive Blue Star'
         },
         5: {
           size: _.sample(_.range(120, 220, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Average Sun-like Star'
         },
         6: {
           size: _.sample(_.range(120, 220, 5)),
-          color: colors.blue
+          color: colors.blue,
+          type: 'Massive Blue Star'
         }
       },
       4: {
         1: {
           size: _.sample(_.range(220, 300, 10)),
-          color: colors.red
+          color: colors.red,
+          type: 'Red-Giant Star'
         },
         2: {
           size: _.sample(_.range(220, 300, 10)),
-          color: colors.red
+          color: colors.red,
+          type: 'Red-Giant Star'
         },
         3: {
           size: _.sample(_.range(220, 300, 10)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Red Supergiant Star'
         },
         4: {
           size: _.sample(_.range(220, 300, 10)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Red Supergiant Star'
         },
         5: {
           size: _.sample(_.range(220, 300, 10)),
-          color: colors.red
+          color: colors.red,
+          type: 'Red-Giant Star'
         },
         6: {
           size: _.sample(_.range(220, 300, 10)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Red Supergiant Star'
         }
       },
       5: {
         1: {
           size: _.sample(_.range(500, 600, 5)),
-          color: colors.red
+          color: colors.red,
+          type: 'Red-Giant Star'
         },
         2: {
           size: _.sample(_.range(500, 600, 5)),
-          color: colors.red
+          color: colors.red,
+          type: 'Red-Giant Star'
         },
         3: {
           size: _.sample(_.range(500, 600, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Red Supergiant Star'
         },
         4: {
           size: _.sample(_.range(500, 600, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Red Supergiant Star'
         },
         5: {
           size: _.sample(_.range(500, 600, 5)),
-          color: colors.red
+          color: colors.red,
+          type: 'Red-Giant Star'
         },
         6: {
           size: _.sample(_.range(500, 600, 5)),
-          color: colors.sun
+          color: colors.sun,
+          type: 'Red Supergiant Star'
         }
       }
     };
@@ -268,7 +298,9 @@ class App extends Component {
       moonMaxRadius,
       moonMinRadius,
       sunSize: sun.size,
-      sunColor: sun.color
+      sunColor: sun.color,
+      sunType: sun.type,
+      homePlanetEnvironement
     };
 
     this.solarSystem.clearSolarSystem();
@@ -278,7 +310,7 @@ class App extends Component {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
     //
-    const homePlanetInt = getRandomInt(2, planetCount);
+    const homePlanetInt = getRandomInt(2, planetCount - 1);
     const asteroidBeltInt = getRandomInt(1, 3);
     const asteroidBeltPlanetArr = [];
     const moonInt = getRandomInt(1, planetCount - 2);
@@ -289,7 +321,7 @@ class App extends Component {
     const planetCountArrForMoons = _.range(2, planetCount);
 
     for (let j = 0; j < planetCount; j++) {
-      if (homePlanetInt) {
+      if (homePlanetInt === j) {
         planetsArr.push(this.solarSystem.generatePlanet(j, true));
       } else {
         planetsArr.push(this.solarSystem.generatePlanet(j));
@@ -343,6 +375,7 @@ class App extends Component {
     };
 
     this.solarSystem.generateCrazyPlanet();
+    this.solarSystem.clearCameraAnimation();
     this.setState({newSystem: newProperties})
   }
 
@@ -355,11 +388,59 @@ class App extends Component {
   handleNameChange = (event, systemName) => this.setState({systemName});
   handleAnimalChange = (event, index, animalValue) => this.setState({animalValue});
 
+  onConfigureHomePlanet() {
+    this.setState({configuringHomePlanet: true});
+    this.solarSystem.followHomePlanet();
+  }
+
   getSolarSystemName() {
     return (
       <div id='systemNameContainer'>
         <div className='welcome-to' id='header'>Welcome to</div>
         <div className='system-name' id='mainHeader'> System {this.state.newSystem.name} </div>
+      </div>
+    );
+  }
+
+  getHomePlanetConfigurationModal() {
+    const { newSystem, configuringHomePlanet } = this.state;
+    const menuClassMap = {
+      'home-planet-modal': true,
+      'show': configuringHomePlanet
+    };
+
+    return (
+      <div className={classList(menuClassMap)} id='creationMenu'>
+          <div>This Is Your Home Planet!</div>
+          <h5>Your planet is a {newSystem.homePlanetEnvironement} Planet </h5>
+          <h5>{`It is a very early in it's lifetime. A small civilization has started its journey on this planet!`}</h5>
+          <div className='generate-system-button' onClick={() => this.solarSystem.addTreeToHomePlanet()}>Add Trees</div>
+          <div className='generate-system-button' onClick={() => this.solarSystem.addCitiesToHomePlanet()}>Add Cities</div>
+          <div className='generate-system-button' onClick={() => this.solarSystem.addLandMassToHomePlanet()}>Add Land</div>
+      </div>
+    );
+  }
+
+  getGeneratedSystemModal() {
+    const { newSystem, configuringHomePlanet } = this.state;
+    const menuClassMap = {
+      'generated-system-modal': true,
+      'hide': configuringHomePlanet
+    };
+    const moonPlanets = newSystem.moonPlanetsArr.length;
+    const ringPlanets = newSystem.asteroidBeltPlanetArr.length;
+
+    return (
+      <div className={classList(menuClassMap)} id='creationMenu'>
+          <div>Welcome to System {this.state.newSystem.name}</div>
+          <h5>Your System Has...</h5>
+          <ul>
+            <li><p>{newSystem.sunType} at the center</p></li>
+            <li><p>{newSystem.planetsArr.length} Planets</p></li>
+            <li><p>{(moonPlanets > 1) ? `${moonPlanets} Planets Have Moons` : `1 Planet has a Moon`}</p></li>
+            <li><p>{(ringPlanets > 1) ? `${ringPlanets} Planets Have Rings` : `1 Planet has a ring`}</p></li>
+          </ul>
+          <div className='generate-system-button' onClick={this.onConfigureHomePlanet.bind(this)}>Configure Home Planet!</div>
       </div>
     );
   }
@@ -386,6 +467,9 @@ class App extends Component {
           <button onClick={() => this.loadSystem(this.state.newSystem)}>Load Solar System</button>
           {loading ? <div className='loading-menu'>Generating Your Solar System</div> : null}
           {generateNewSystem && !loading ? this.getSolarSystemName() : null}
+          {generateNewSystem && !loading ? this.getGeneratedSystemModal() : null}
+          {generateNewSystem && !loading ? this.getHomePlanetConfigurationModal() : null}
+          <div className='unlock-camera-button' onClick={() => this.solarSystem.clearCameraAnimation()}>Unlock Camera</div>
           <div className={classList(buttonClassMap)} onClick={this.onCreateSystemClick.bind(this)} id='pressHereButton'>Press Here to Create Your Own System</div>
           <div className={classList(menuClassMap)} id='creationMenu'>
               <div>Create Your Own System</div>

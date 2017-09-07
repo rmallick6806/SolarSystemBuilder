@@ -144,6 +144,51 @@ body {
   display: none;
 }
 
+.generated-system-modal {
+  position: absolute;
+  bottom: 20px;
+  z-index: 1;
+  right: 30px;
+  width: 500px;
+  color: white;
+  text-align: left;
+  background: #f2c66d;
+  font-family: Josefin Sans, serif;
+  padding: 30px 30px;
+  font-size: 28px;
+  box-shadow: 1px 1px 6px 0px black;
+  text-shadow: 1px 1px grey;
+  border: 10px dashed #f07464;
+  border-radius: 5px;
+}
+
+.generated-system-modal.hide {
+  display: none;
+}
+
+.home-planet-modal {
+  position: absolute;
+  bottom: 20px;
+  z-index: 1;
+  right: 30px;
+  width: 500px;
+  color: white;
+  text-align: left;
+  background: #f2c66d;
+  font-family: Josefin Sans, serif;
+  padding: 30px 30px;
+  font-size: 28px;
+  box-shadow: 1px 1px 6px 0px black;
+  text-shadow: 1px 1px grey;
+  border: 10px dashed #f07464;
+  border-radius: 5px;
+  display: none;
+}
+
+.home-planet-modal.show {
+  display: block;
+}
+
 .create-system-menu.show {
   display: block;
 }
@@ -159,4 +204,21 @@ body {
 
 .generate-system-button:hover{
   background: #0077be;
+}
+
+.unlock-camera-button{
+  position: absolute;
+  bottom: 60px;
+  z-index: 1;
+  left: 60px;
+  color: white;
+  text-align: left;
+  background: #f2c66d;
+  font-family: Josefin Sans, serif;
+  padding: 30px 30px;
+  font-size: 28px;
+  box-shadow: 1px 1px 6px 0px black;
+  text-shadow: 1px 1px grey;
+  border: 10px dashed #f07464;
+  border-radius: 5px;
 }

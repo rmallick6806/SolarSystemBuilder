@@ -17,6 +17,20 @@ const star = function(radius, color) {
   });
 }
 
+const landMass = function(dynamicGeometry, material) {
+  return new WHS.Tetrahedron({
+    geometry: {
+      radius: 5,
+      detail: 2
+    },
+
+    modules: [
+      dynamicGeometry
+    ],
+    material
+  });
+}
+
 const planetShape1 = function(dynamicGeometry, material) {
   return new WHS.Dodecahedron({
     geometry: {
@@ -80,4 +94,21 @@ const planetShape4 = function (dynamicGeometry, material) {
   });
 }
 
-export { star, planetShape1, planetShape2, planetShape3, planetShape4 };
+const homePlanet = function (dynamicGeometry, material) {
+  return new WHS.Sphere({
+    geometry: {
+      buffer: true,
+      radius: 10,
+      widthSegments: 32,
+      heightSegments: 32
+    },
+
+    modules: [
+      dynamicGeometry
+    ],
+
+    material
+  });
+}
+
+export { star, planetShape1, planetShape2, planetShape3, planetShape4, homePlanet, landMass };

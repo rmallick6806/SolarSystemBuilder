@@ -2,7 +2,7 @@ import * as WHS from 'whs';
 import * as THREE from 'three';
 import { colors } from './colors.js';
 import * as Lights from './lights.js';
-import { star, planetShape1, planetShape2, planetShape3, planetShape4 } from './spaceObjects.js';
+import { star, planetShape1, planetShape2, planetShape3, planetShape4, homePlanet, landMass } from './spaceObjects.js';
 import _ from 'lodash';
 
 import GeometryUtils from './GeometryUtils.js';
@@ -65,6 +65,8 @@ class SolarSystem {
     this.s2 = planetShape2(this.dynamicGeometry, this.material)
     this.s3 = planetShape3(this.dynamicGeometry, this.material)
     this.s4 = planetShape4(this.dynamicGeometry, this.material)
+    this.homePlanetShape = homePlanet(this.dynamicGeometry, this.material)
+    this.landMassShape = landMass(this.dynamicGeometry, this.material);
 
     this.space.addTo(this.app);
     this.space.rotation.z = Math.PI / 12;
@@ -161,8 +163,12 @@ class SolarSystem {
   }
 
   generatePlanet(i, homePlanet) {
-    const planet = [this.s1, this.s1, this.s4, this.s1][Math.ceil(Math.random() * 3)].clone(),
-      radius = this.properties.planetMinRadius + Math.random() * (this.properties.planetMaxRadius - this.properties.planetMinRadius);
+    let planet = [this.s1, this.s1, this.s4, this.s1][Math.ceil(Math.random() * 3)].clone();
+    const radius = this.properties.planetMinRadius + Math.random() * (this.properties.planetMaxRadius - this.properties.planetMinRadius);
+
+    if (homePlanet) {
+      planet = this.homePlanetShape.clone();
+    };
 
     planet.g_({
       radiusBottom: radius,
@@ -184,25 +190,23 @@ class SolarSystem {
 
     // Set position & rotation.
     planet.position.x = Math.cos(planet.data.angle) * planet.data.distance;
-    // planet.position.z = Math.sin(planet.data.angle) * planet.data.distance;
+    planet.position.z = Math.sin(planet.data.angle) * planet.data.distance;
     planet.position.y = -10 * Math.random() + 4;
 
     planet.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
 
     this.mouse.track(planet);
     planet.on('click', () => {
-    	// camera.position.x = cameraOffset.x;
-    	// camera.position.y = cameraOffset.y;
-    	// camera.position.z = cameraOffset.z;
-
-
+      if (this.cameraAnimation) {
+        this.cameraAnimation.stop();
+      }
       this.cameraAnimation = new WHS.Loop(() => {
-
-        var relativeCameraOffset = new THREE.Vector3(10,50,200);
+        planet.rotation.y -= 2 / 30;
+        var relativeCameraOffset = new THREE.Vector3(0,200,0);
       	var cameraOffset = relativeCameraOffset.applyMatrix4( planet.native.matrixWorld );
         //
-        // // this.camera.position.x = cameraOffset.x;
-        // this.camera.position.y = cameraOffset.y;
+        this.camera.position.x = cameraOffset.x;
+        this.camera.position.y = cameraOffset.y;
         this.camera.position.z = cameraOffset.z;
 
         this.camera.native.lookAt(planet.position);
@@ -324,12 +328,11 @@ class SolarSystem {
 
   addTreeToPlanet(planet) {
     const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
-    this.app.get('scene').add(normalsHelper);
     // Cone
-    const scale = 5;
+    const scale = 3;
     const cone = new WHS.Cone({
       geometry: {
-        radius: scale,
+        radius: scale / 2,
         height: scale * 2
       },
 
@@ -341,7 +344,7 @@ class SolarSystem {
     const upVec = new THREE.Vector3(0, 1, 0);
     const sg = planet.geometry;
     sg.computeVertexNormals(); // compute normals for each vertex
-    const face = sg.faces[0]; // the actual face
+    const face = _.sample(sg.faces); // the actual face
     const point = sg.vertices[face.a]; // selected vertice (can be a, b or c)
     const pointNormal = face.vertexNormals[0]; // it's normal (a=0)
     const quat = new THREE.Quaternion().setFromUnitVectors(upVec, pointNormal);
@@ -354,50 +357,92 @@ class SolarSystem {
 
   addCityToPlanet(planet) {
     const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
-    this.app.get('scene').add(normalsHelper);
     // Cone
     const scale = 2;
     const cube = new WHS.Box({
       geometry: {
-        height: scale * 0.5,
-        width: scale * 0.5,
+        height: scale * 2,
+        width: scale * 1,
         depth: scale * 0.5
       },
 
       material: new THREE.MeshPhongMaterial({
-        color: colors.grey,
-      }),
-      position: [0, scale, 0]
-    });
-    const cube2 = new WHS.Box({
-      geometry: {
-        height: scale * 10,
-        width: scale * 2,
-        depth: scale * 20
-      },
-
-      material: new THREE.MeshPhongMaterial({
-        color: colors.green,
+        color: colors.blue,
+        shading: THREE.FlatShading
       }),
       position: [0, scale, 0]
     });
     const upVec = new THREE.Vector3(0, 1, 0);
     const sg = planet.geometry;
-    sg.computeVertexNormals(); // compute normals for each vertex
-    const face = sg.faces[0]; // the actual face
+    sg.computeVertexNormals();
+    const face = _.sample(sg.faces);
 
-    const point = sg.vertices[face.a]; // selected vertice (can be a, b or c)
+    const point = sg.vertices[face.b];
 
-    const pointNormal = face.vertexNormals[0]; // it's normal (a=0)
+    const pointNormal = face.vertexNormals[0];
     const faceNormal = face.normal;
     const quat = new THREE.Quaternion().setFromUnitVectors(upVec, faceNormal);
-
-    let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 2);
+    console.log(sg, '!');
+    let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 20);
 
     const group = new WHS.Group(cube); // = Object3D in Three.js
-    group.position.copy(_.sample(newestPoint));
+    group.position.copy(point);
     group.quaternion.copy(quat);
     group.addTo(planet);
+  }
+
+  addLandMassToPlanet(planet) {
+    const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
+    const upVec = new THREE.Vector3(0, 1, 0);
+    const sg = planet.geometry;
+    sg.computeVertexNormals();
+    sg.computeFaceNormals();
+    const face = _.sample(sg.faces);
+
+    const point = sg.vertices[face];
+
+    const pointNormal = face.vertexNormals[0];
+    const faceNormal = face.normal;
+    const quat = new THREE.Quaternion().setFromUnitVectors(upVec, faceNormal);
+    let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 20);
+
+    const land = this.landMassShape.clone(),
+      radius = this.properties.moonMinRadius + Math.random() * (this.properties.moonMaxRadius - this.properties.moonMinRadius);
+
+    land.g_({
+      radiusBottom: radius/2,
+      radiusTop: 0,
+      height: land instanceof WHS.Cylinder ? radius * 2 : radius,
+      width: radius/2,
+      depth: radius/2,
+      radius
+    });
+
+    land.material = this.mat[0]; // Set custom THREE.Material to mesh.
+
+    // Planet data
+    land.data = {
+      distance: planet.geometry.boundingSphere.radius - 5,
+      angle: Math.random() * Math.PI *2,
+      homePlanet: homePlanet
+    };
+    // this.landMass = new WHS.Group();
+    // this.landMass.addTo(planet);
+    // this.landMass.position.copy(point);
+    // this.landMass.quaternion.copy(quat);
+
+    // Set position & rotation.
+    this.landMass = new WHS.Group();
+    this.landMass.addTo(planet);
+
+    land.position.x = Math.cos(land.data.angle) * land.data.distance;
+    land.position.z = Math.sin(land.data.angle) * land.data.distance;
+    land.position.y = 0
+    //
+    // land.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+
+    land.addTo(this.landMass);
+    return land;
   }
 
   generateCrazyPlanet() {
@@ -424,9 +469,64 @@ class SolarSystem {
     this.animation.start();
   }
 
+  clearCameraAnimation() {
+    this.cameraAnimation.stop();
+  }
+
+  followHomePlanet() {
+    const planetsArr = this.properties.planetsArr;
+    const homePlanetIdx = _.findIndex(planetsArr, (planet) => { return planet.data.homePlanet});
+    const planet = planetsArr[homePlanetIdx];
+
+    if (this.cameraAnimation) {
+      this.cameraAnimation.stop();
+    }
+    this.cameraAnimation = new WHS.Loop(() => {
+
+      var relativeCameraOffset = new THREE.Vector3(200,50,10);
+      var cameraOffset = relativeCameraOffset.applyMatrix4( planetsArr[homePlanetIdx].native.matrixWorld );
+      //
+      // this.camera.position.x = cameraOffset.x;
+      // this.camera.position.y = cameraOffset.y;
+      // this.camera.position.z = cameraOffset.z;
+      planet.rotation.y -= 1 / 30;
+      this.camera.native.lookAt(planet.position);
+
+      this.camera.position.set(planet.position.x + 100, planet.position.y + 100, planet.position.z + 100);
+    });
+
+    this.app.addLoop(this.cameraAnimation);
+    this.cameraAnimation.start();
+
+  }
+
   clearSolarSystem() {
     this.space.remove(this.planets);
     this.app.remove(this.space);
+  }
+
+  addTreeToHomePlanet() {
+    const planetsArr = this.properties.planetsArr;
+    const homePlanetIdx = _.findIndex(planetsArr, (planet) => { return planet.data.homePlanet});
+    const planet = planetsArr[homePlanetIdx];
+
+    this.addTreeToPlanet(planet);
+  }
+
+  addLandMassToHomePlanet() {
+    const planetsArr = this.properties.planetsArr;
+    const homePlanetIdx = _.findIndex(planetsArr, (planet) => { return planet.data.homePlanet});
+    const planet = planetsArr[homePlanetIdx];
+
+    this.addLandMassToPlanet(planet);
+  }
+
+  addCitiesToHomePlanet() {
+    const planetsArr = this.properties.planetsArr;
+    const homePlanetIdx = _.findIndex(planetsArr, (planet) => { return planet.data.homePlanet});
+    const planet = planetsArr[homePlanetIdx];
+
+    this.addCityToPlanet(planet);
   }
 }
 
