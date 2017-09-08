@@ -12,6 +12,10 @@ import { colors } from './colors.js';
 import * as WHS from 'whs';
 import * as THREE from 'three';
 
+import createDeepstream from 'deepstream.io-client-js';
+import CircularJSON from 'circular-json';
+import stringify from 'json-stringify-safe';
+
 import {TweenMax, Linear, TimelineLite} from "gsap";
 
 const muiTheme = getMuiTheme({
@@ -23,6 +27,8 @@ class App extends Component {
     super();
     this.state = {};
     this.solarSystem;
+    this.ds = createDeepstream('wss://013.deepstreamhub.com?apiKey=29364a74-fdca-42d6-8c3a-2424cfbce5d8');
+    this.client = this.ds.login();
   }
 
   componentDidMount() {
@@ -86,7 +92,6 @@ class App extends Component {
     this.setState({loading: true});
 
     _.delay(() => this.setState({generateNewSystem: true, loading: false}), 2000);
-    // this.setState({generateNewSystem: true});
 
     // const radiusMin = 190; // Min radius of the planet belt.
     // const radiusMax = 300; // Max radius of the planet belt.
@@ -309,7 +314,7 @@ class App extends Component {
     const getRandomInt = function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    //
+
     const homePlanetInt = getRandomInt(2, planetCount - 1);
     const asteroidBeltInt = getRandomInt(1, 3);
     const asteroidBeltPlanetArr = [];
@@ -356,19 +361,31 @@ class App extends Component {
       moonPlanetsArr.push({id: planetNum, moons: moons});
     };
 
+    const storeableMoonData = [];
     for (let h = 0; h < moonPlanetsArr.length; h++) {
       const planet = moonPlanetsArr[h];
-      this.solarSystem.generateMoon(planetsArr[planet.id], false, 0);
+      storeableMoonData.push(this.solarSystem.generateMoon(planetsArr[planet.id], false, 0, planet.id).data);
       if (planet.moons > 2) {
-        this.solarSystem.generateMoon(planetsArr[planet.id], false, 40);
+        storeableMoonData.push(this.solarSystem.generateMoon(planetsArr[planet.id], false, 40, planet.id).data);
       }
       if (planet.moons >= 3) {
-        this.solarSystem.generateMoon(planetsArr[planet.id], false, 60);
+        storeableMoonData.push(this.solarSystem.generateMoon(planetsArr[planet.id], false, 60, planet.id).data);
       }
-    }
+    };
+
+    let storeablePlanetsData = [];
+    _.forEach(planetsArr, (planet, i) => {
+      storeablePlanetsData.push(
+        planet.data
+      );
+    });
+
+    console.log(moonPlanetsArr, '!');
 
     newProperties = {
       ...newProperties,
+      storeablePlanetsData,
+      storeableMoonData,
       planetsArr,
       asteroidBeltPlanetArr,
       moonPlanetsArr
@@ -376,12 +393,19 @@ class App extends Component {
 
     this.solarSystem.generateCrazyPlanet();
     this.solarSystem.clearCameraAnimation();
-    this.setState({newSystem: newProperties})
+    this.setState({newSystem: newProperties});
+
+    // let recordName = 'system/' + systemName;
+    // this.record = this.client.record.getRecord(recordName);
+    // this.record.set({
+    //   ...newProperties,
+    //   planetsArr: null
+    // });
   }
 
   loadSystem(properties) {
     this.solarSystem.setProperties(properties);
-    this.solarSystem.generateCrazyPlanet();
+    this.solarSystem.loadSystem(properties);
   }
 
   handleChange = (event, index, value) => this.setState({value});

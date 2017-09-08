@@ -178,52 +178,51 @@ class SolarSystem {
       depth: radius,
       radius
     });
-
-    planet.material = this.mat[Math.floor(4 * Math.random())]; // Set custom THREE.Material to mesh.
+    let colorPicker = ['green', 'blue', 'orange', 'blue'];
+    let color = colorPicker[Math.floor(4 * Math.random())];
+    planet.material = this.colorMat[color];
 
     // Planet data
     planet.data = {
       distance: this.properties.radiusMin + i * (this.properties.radiusMax - this.properties.radiusMin),
       angle: Math.random() * Math.PI * 2,
-      homePlanet: homePlanet
+      homePlanet: homePlanet,
+      shape: (planet instanceof WHS.Dodecahedron) ? 'Dodecahedron' : 'Sphere',
+      radius,
+      color
+    };
+
+    let x = Math.cos(planet.data.angle) * planet.data.distance,
+        y = -10 * Math.random() + 4,
+        z = Math.sin(planet.data.angle) * planet.data.distance,
+        rotationX = Math.PI * 2 * Math.random(),
+        rotationY = Math.PI * 2 * Math.random(),
+        rotationZ = Math.PI * 2 * Math.random();
+
+    planet.data = {
+      ...planet.data,
+      x,
+      y,
+      z,
+      rotationX,
+      rotationY,
+      rotationZ
     };
 
     // Set position & rotation.
-    planet.position.x = Math.cos(planet.data.angle) * planet.data.distance;
-    planet.position.z = Math.sin(planet.data.angle) * planet.data.distance;
-    planet.position.y = -10 * Math.random() + 4;
+    planet.position.x = x;
+    planet.position.z = z;
+    planet.position.y = y;
+    planet.rotation.set(rotationX, rotationY, rotationZ);
 
-    planet.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+    this.mouseTrackPlanet(planet);
 
-    this.mouse.track(planet);
-    planet.on('click', () => {
-      if (this.cameraAnimation) {
-        this.cameraAnimation.stop();
-      }
-      this.cameraAnimation = new WHS.Loop(() => {
-        planet.rotation.y -= 2 / 30;
-        var relativeCameraOffset = new THREE.Vector3(0,200,0);
-      	var cameraOffset = relativeCameraOffset.applyMatrix4( planet.native.matrixWorld );
-        //
-        this.camera.position.x = cameraOffset.x;
-        this.camera.position.y = cameraOffset.y;
-        this.camera.position.z = cameraOffset.z;
-
-        this.camera.native.lookAt(planet.position);
-        this.camera.native.zoom = 2000;
-        // this.camera.position.set(planet.position.x + 100, planet.position.y + 100, planet.position.z + 100);
-      });
-
-      this.app.addLoop(this.cameraAnimation);
-      this.cameraAnimation.start();
-
-    });
     planet.addTo(this.planets);
     return planet;
   }
 
 
-  generateMoon(planet, homePlanet, extraDistance = 0) {
+  generateMoon(planet, homePlanet, extraDistance = 0, planetIdx) {
     this.moons = new WHS.Group();
     this.moons.addTo(planet);
     const moon = [this.s1, this.s1, this.s4, this.s1][Math.ceil(Math.random() * 3)].clone(),
@@ -238,21 +237,40 @@ class SolarSystem {
       radius
     });
 
-    moon.material = this.mat[Math.floor(4 * Math.random())]; // Set custom THREE.Material to mesh.
-
+    let colorPicker = ['green', 'blue', 'orange', 'blue'];
+    let color = colorPicker[Math.floor(4 * Math.random())];
+    moon.material = this.colorMat[color];
     // Planet data
     moon.data = {
       distance: radius + extraDistance + 40,
       angle: Math.random() * Math.PI * 2,
-      homePlanet: homePlanet
+      homePlanet: homePlanet,
+      rotationX: Math.PI * 2 * Math.random(),
+      rotationY: Math.PI * 2 * Math.random(),
+      rotationZ: Math.PI * 2 * Math.random(),
+      x,
+      y,
+      z,
+      color,
+      shape: (planet instanceof WHS.Dodecahedron) ? 'Dodecahedron' : 'Sphere',
+      planetIdx: planetIdx,
+      radius
     };
 
-    // Set position & rotation.
-    moon.position.y = Math.cos(moon.data.angle) * moon.data.distance;
-    moon.position.z = Math.sin(moon.data.angle) * moon.data.distance;
-    moon.position.x = 0;
+    let y = Math.cos(moon.data.angle) * moon.data.distance;
+    let z = Math.sin(moon.data.angle) * moon.data.distance;
+    let x = 0;
 
-    moon.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+    // Set position & rotation.
+    moon.position.y = x;
+    moon.position.z = z;
+    moon.position.x = x;
+
+    moon.data.x = x;
+    moon.data.y = y;
+    moon.data.z = z;
+
+    moon.rotation.set(moon.data.rotationX, moon.data.rotationY, moon.data.rotationZ);
 
     moon.addTo(this.moons);
     return moon;
@@ -357,13 +375,13 @@ class SolarSystem {
 
   addCityToPlanet(planet) {
     const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
-    // Cone
+    // Cube
     const scale = 2;
     const cube = new WHS.Box({
       geometry: {
         height: scale * 2,
         width: scale * 1,
-        depth: scale * 0.5
+        depth: scale * 2
       },
 
       material: new THREE.MeshPhongMaterial({
@@ -382,8 +400,8 @@ class SolarSystem {
     const pointNormal = face.vertexNormals[0];
     const faceNormal = face.normal;
     const quat = new THREE.Quaternion().setFromUnitVectors(upVec, faceNormal);
-    console.log(sg, '!');
-    let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 20);
+
+    // let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 20);
 
     const group = new WHS.Group(cube); // = Object3D in Three.js
     group.position.copy(point);
@@ -448,11 +466,13 @@ class SolarSystem {
   }
 
   generateCrazyPlanet() {
-    this.app.remove(this.space);
+    this.clearSolarSystem();
     this.space = new WHS.Group();
     this.space.addTo(this.app);
     this.sun = star(this.properties.sunSize, this.properties.sunColor);
     this.sun.addTo(this.space);
+
+    this.space.rotation.z = Math.PI / 12;
 
     // this.space.remove(this.planets);
     this.planets = new WHS.Group();
@@ -471,7 +491,117 @@ class SolarSystem {
     this.animation.start();
   }
 
+  loadPlanet(planetObj) {
+    let shape = {'Dodecahedron': this.s1, 'Sphere': this.s4};
+    let planet = shape[planetObj.shape].clone();
+
+    const radius = planetObj.radius;
+
+    if (planetObj.homePlanet) {
+      planet = this.homePlanetShape.clone();
+    };
+
+    planet.g_({
+      radiusBottom: radius,
+      radiusTop: 0,
+      height: radius,
+      width: radius,
+      depth: radius,
+      radius
+    });
+
+    planet.material = this.colorMat[planetObj.color];
+
+    let x = planetObj.x,
+        y = planetObj.y,
+        z = planetObj.z,
+        rotationX = planetObj.rotationX,
+        rotationY = planetObj.rotationY,
+        rotationZ = planetObj.rotationZ;
+
+    // Set position & rotation.
+    planet.position.x = x;
+    planet.position.z = z;
+    planet.position.y = y;
+    planet.rotation.set(rotationX, rotationY, rotationZ);
+
+    planet.data = planetObj
+
+    this.mouseTrackPlanet(planet);
+    return planet;
+  }
+
+  loadMoon(moonObj) {
+    let shape = {'Dodecahedron': this.s1, 'Sphere': this.s4};
+    let moon = shape[moonObj.shape].clone();
+
+    const radius = moonObj.radius;
+
+    moon.g_({
+      radiusBottom: radius,
+      radiusTop: 0,
+      height: radius,
+      width: radius,
+      depth: radius,
+      radius
+    });
+
+    moon.material = this.colorMat[moonObj.color];
+
+    let x = moonObj.x,
+        y = moonObj.y,
+        z = moonObj.z,
+        rotationX = moonObj.rotationX,
+        rotationY = moonObj.rotationY,
+        rotationZ = moonObj.rotationZ;
+
+    // Set position & rotation.
+    moon.position.x = x;
+    moon.position.z = z;
+    moon.position.y = y;
+    moon.rotation.set(rotationX, rotationY, rotationZ);
+
+    moon.data = moonObj
+    return moon;
+  }
+
+  loadSystem(properties) {
+    this.clearSolarSystem();
+    this.properties = properties;
+
+    this.space = new WHS.Group();
+    this.space.addTo(this.app);
+    this.sun = star(properties.sunSize, properties.sunColor);
+    this.sun.addTo(this.space);
+
+    this.space.rotation.z = Math.PI / 12;
+
+    this.planets = new WHS.Group();
+    this.planets.addTo(this.space);
+
+    const planetsArr = [];
+    for (let i = 0; i < properties.storeablePlanetsData.length; i++) {
+      let planet = this.loadPlanet(properties.storeablePlanetsData[i]);
+      planet.addTo(this.planets);
+      planetsArr.push(planet);
+    }
+    console.log(properties.storeableMoonData);
+
+    _.forEach(properties.storeableMoonData, (moon, j) => {
+      this.moons = new WHS.Group();
+      this.moons.addTo(planetsArr[moon.planetIdx]);
+      this.loadMoon(moon, planetsArr[moon.planetIdx]).addTo(this.moons);
+    });
+
+    let lastPlanet = _.last(properties.storeablePlanetsData);
+    let lastPlanetDistance = lastPlanet.distance;
+
+    this.generateSolarAsteroidBelt(this.sun, 3, 6, lastPlanetDistance + 100);
+    this.animation.start();
+  }
+
   clearCameraAnimation() {
+    this.space.rotation.z = Math.PI / 12;
     this.cameraAnimation.stop();
   }
 
@@ -483,6 +613,7 @@ class SolarSystem {
     if (this.cameraAnimation) {
       this.cameraAnimation.stop();
     }
+    this.space.rotation.z -= Math.PI / 12;
     this.cameraAnimation = new WHS.Loop(() => {
 
       var relativeCameraOffset = new THREE.Vector3(200,50,10);
@@ -502,8 +633,42 @@ class SolarSystem {
 
   }
 
+  mouseTrackPlanet(planet) {
+    this.mouse.track(planet);
+    planet.on('click', () => {
+      if (this.cameraAnimation) {
+        this.cameraAnimation.stop();
+      }
+      this.space.rotation.z -= Math.PI / 12;
+      this.cameraAnimation = new WHS.Loop(() => {
+        planet.rotation.y -= 2 / 30;
+        var relativeCameraOffset = new THREE.Vector3(0,200,0);
+        var cameraOffset = relativeCameraOffset.applyMatrix4( planet.native.matrixWorld );
+        //
+        this.camera.position.x = cameraOffset.x;
+        this.camera.position.y = cameraOffset.y;
+        this.camera.position.z = cameraOffset.z;
+
+        this.camera.native.lookAt(planet.position);
+        this.camera.native.zoom = 2000;
+        // this.camera.position.set(planet.position.x + 100, planet.position.y + 100, planet.position.z + 100);
+      });
+
+      this.app.addLoop(this.cameraAnimation);
+      this.cameraAnimation.start();
+
+    });
+  }
+
   clearSolarSystem() {
+    this.animation.stop();
+    this.cameraAnimation.stop();
     this.space.remove(this.planets);
+    this.space.remove(this.moons);
+    this.planets.remove(this.moons);
+    this.space.remove(this.sun);
+    this.space.remove(this.asteroidBelt);
+    this.space.remove(this.solarAsteroidBelt);
     this.app.remove(this.space);
   }
 
