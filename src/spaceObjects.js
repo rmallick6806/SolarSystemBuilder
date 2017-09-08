@@ -18,7 +18,7 @@ const star = function(radius, color) {
 }
 
 const landMass = function(dynamicGeometry, material) {
-  return new WHS.Tetrahedron({
+  return new WHS.Cylinder({
     geometry: {
       radius: 5,
       detail: 2

@@ -329,7 +329,7 @@ class SolarSystem {
   addTreeToPlanet(planet) {
     const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
     // Cone
-    const scale = 3;
+    const scale = 1;
     const cone = new WHS.Cone({
       geometry: {
         radius: scale / 2,
@@ -392,57 +392,59 @@ class SolarSystem {
   }
 
   addLandMassToPlanet(planet) {
+    this.landMass = new WHS.Group();
+    this.landMass.addTo(planet);
+
     const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
     const upVec = new THREE.Vector3(0, 1, 0);
     const sg = planet.geometry;
     sg.computeVertexNormals();
-    sg.computeFaceNormals();
-    const face = _.sample(sg.faces);
 
-    const point = sg.vertices[face];
+    for (let i = 0; i < 300; i++) {
+      const face = _.sample(sg.faces);
 
-    const pointNormal = face.vertexNormals[0];
-    const faceNormal = face.normal;
-    const quat = new THREE.Quaternion().setFromUnitVectors(upVec, faceNormal);
-    let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 20);
+      const point = sg.vertices[face.a];
 
-    const land = this.landMassShape.clone(),
-      radius = this.properties.moonMinRadius + Math.random() * (this.properties.moonMaxRadius - this.properties.moonMinRadius);
+      const pointNormal = face.vertexNormals[0];
+      const faceNormal = face.normal;
+      const quat = new THREE.Quaternion().setFromUnitVectors(upVec, faceNormal);
+      let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 20);
 
-    land.g_({
-      radiusBottom: radius/2,
-      radiusTop: 0,
-      height: land instanceof WHS.Cylinder ? radius * 2 : radius,
-      width: radius/2,
-      depth: radius/2,
-      radius
-    });
+      const land = this.landMassShape.clone(),
+        radius = this.properties.moonMinRadius + Math.random() * (this.properties.moonMaxRadius - this.properties.moonMinRadius);
 
-    land.material = this.mat[0]; // Set custom THREE.Material to mesh.
+      land.g_({
+        radiusBottom: radius * 0.7,
+        radiusTop: 0,
+        height: land instanceof WHS.Cylinder ? radius * 1/5 : radius,
+        width: radius/2,
+        depth: radius/2,
+        radius
+      });
 
-    // Planet data
-    land.data = {
-      distance: planet.geometry.boundingSphere.radius - 5,
-      angle: Math.random() * Math.PI *2,
-      homePlanet: homePlanet
-    };
-    // this.landMass = new WHS.Group();
-    // this.landMass.addTo(planet);
-    // this.landMass.position.copy(point);
-    // this.landMass.quaternion.copy(quat);
+      land.material = this.mat[0]; // Set custom THREE.Material to mesh.
 
-    // Set position & rotation.
-    this.landMass = new WHS.Group();
-    this.landMass.addTo(planet);
+      // Planet data
+      land.data = {
+        distance: planet.geometry.boundingSphere.radius - 5,
+        angle: Math.random() * Math.PI * 2,
+        homePlanet: homePlanet
+      };
 
-    land.position.x = Math.cos(land.data.angle) * land.data.distance;
-    land.position.z = Math.sin(land.data.angle) * land.data.distance;
-    land.position.y = 0
-    //
-    // land.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+      // Set position & rotation.
+      land.position.copy(point);
+      land.quaternion.copy(quat);
 
-    land.addTo(this.landMass);
-    return land;
+      // land.position.x = Math.cos(land.data.angle) * land.data.distance;
+      // land.position.z = Math.sin(land.data.angle) * land.data.distance;
+      // land.position.y = Math.cos(land.data.angle) * land.data.distance * 10;//_.sample(_.range(-planet.geometry.boundingSphere.radius * 0.5, planet.geometry.boundingSphere.radius * 0.5));
+      //
+      // land.rotation.set(Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+
+      land.addTo(this.landMass);
+    }
+
+    return this.landMass;
   }
 
   generateCrazyPlanet() {
