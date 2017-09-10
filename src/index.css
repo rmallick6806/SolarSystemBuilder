@@ -153,6 +153,7 @@ body {
   color: white;
   text-align: left;
   background: #f2c66d;
+  background: transparent;
   font-family: Josefin Sans, serif;
   padding: 30px 30px;
   font-size: 28px;
@@ -175,6 +176,7 @@ body {
   color: white;
   text-align: left;
   background: #f2c66d;
+  background: transparent;
   font-family: Josefin Sans, serif;
   padding: 30px 30px;
   font-size: 28px;

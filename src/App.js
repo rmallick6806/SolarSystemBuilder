@@ -95,8 +95,8 @@ class App extends Component {
 
     // const radiusMin = 190; // Min radius of the planet belt.
     // const radiusMax = 300; // Max radius of the planet belt.
-    const planetMinRadius = 20; // Min of planet radius.
-    const planetMaxRadius = 50; // Max of planet radius.
+    const planetMinRadius = 10; // Min of planet radius.
+    const planetMaxRadius = 60; // Max of planet radius.
     const asteroidMinRadius = 1;
     const asteroidMaxRadius = 3;
     const sunSize = 20; // Radius of sun
@@ -364,12 +364,15 @@ class App extends Component {
     const storeableMoonData = [];
     for (let h = 0; h < moonPlanetsArr.length; h++) {
       const planet = moonPlanetsArr[h];
-      storeableMoonData.push(this.solarSystem.generateMoon(planetsArr[planet.id], false, 0, planet.id).data);
+      let moon1 = this.solarSystem.generateMoon(planetsArr[planet.id], false, 0, planet.id);
+      storeableMoonData.push(moon1.data);
       if (planet.moons > 2) {
-        storeableMoonData.push(this.solarSystem.generateMoon(planetsArr[planet.id], false, 40, planet.id).data);
+        let moon2 = this.solarSystem.generateMoon(planetsArr[planet.id], false, 40, planet.id);
+        storeableMoonData.push(moon2.data);
       }
       if (planet.moons >= 3) {
-        storeableMoonData.push(this.solarSystem.generateMoon(planetsArr[planet.id], false, 60, planet.id).data);
+        let moon3 = this.solarSystem.generateMoon(planetsArr[planet.id], false, 60, planet.id);
+        storeableMoonData.push(moon3.data);
       }
     };
 
@@ -380,32 +383,34 @@ class App extends Component {
       );
     });
 
-    console.log(moonPlanetsArr, '!');
-
     newProperties = {
       ...newProperties,
       storeablePlanetsData,
       storeableMoonData,
       planetsArr,
       asteroidBeltPlanetArr,
-      moonPlanetsArr
+      moonPlanetsArr,
+      landMassArr: [],
+      cityArr: [],
+      treeArr: []
     };
 
     this.solarSystem.generateCrazyPlanet();
     this.solarSystem.clearCameraAnimation();
     this.setState({newSystem: newProperties});
 
-    // let recordName = 'system/' + systemName;
-    // this.record = this.client.record.getRecord(recordName);
-    // this.record.set({
-    //   ...newProperties,
-    //   planetsArr: null
-    // });
+    let recordName = 'system/' + systemName;
+    this.record = this.client.record.getRecord(recordName);
+    this.record.set({
+      ...newProperties,
+      planetsArr: null
+    });
   }
 
   loadSystem(properties) {
-    this.solarSystem.setProperties(properties);
-    this.solarSystem.loadSystem(properties);
+    let loadedProperties = this.record.get();
+    this.solarSystem.setProperties(loadedProperties);
+    this.solarSystem.loadSystem(loadedProperties);
   }
 
   handleChange = (event, index, value) => this.setState({value});
@@ -426,6 +431,25 @@ class App extends Component {
     );
   }
 
+  onAddLandMassToHomePlanet() {
+    const { newSystem } = this.state;
+    let landMassArr = newSystem.landMassArr;
+    let addedLand = this.solarSystem.addLandMassToHomePlanet();
+    landMassArr = _.concat(landMassArr, addedLand);
+
+    this.setState({
+      newSystem: {
+      ...newSystem,
+      landMassArr
+    }});
+    console.log(landMassArr, addedLand);
+    this.record.set({
+      ...newSystem,
+      planetsArr: null,
+      landMassArr
+    });
+  }
+
   getHomePlanetConfigurationModal() {
     const { newSystem, configuringHomePlanet } = this.state;
     const menuClassMap = {
@@ -440,7 +464,7 @@ class App extends Component {
           <h5>{`It is a very early in it's lifetime. A small civilization has started its journey on this planet!`}</h5>
           <div className='generate-system-button' onClick={() => this.solarSystem.addTreeToHomePlanet()}>Add Trees</div>
           <div className='generate-system-button' onClick={() => this.solarSystem.addCitiesToHomePlanet()}>Add Cities</div>
-          <div className='generate-system-button' onClick={() => this.solarSystem.addLandMassToHomePlanet()}>Add Land</div>
+          <div className='generate-system-button' onClick={this.onAddLandMassToHomePlanet.bind(this)}>Add Land</div>
       </div>
     );
   }
