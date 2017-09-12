@@ -35,14 +35,22 @@ class App extends Component {
     let el = document.getElementById('mainHeader');
     let smallEl = document.getElementById('header');
     let pressHereButton = document.getElementById('pressHereButton');
-
+    let loadSystemButton = document.getElementById('loadSystemButton');
+    let unlockCameraButton = document.getElementById('unlockCameraButton');
+    let arrowRight = document.getElementById('arrowRight');
     TweenMax.set(el, {opacity: 0});
     TweenMax.set(smallEl, {opacity: 0});
     TweenMax.set(pressHereButton, {bottom: -300});
+    TweenMax.set(loadSystemButton, {bottom: -300});
+    TweenMax.set(unlockCameraButton, {bottom: -300});
+    TweenMax.set(arrowRight, {right: -300});
 
     TweenMax.to(el, 3, {opacity: 1, delay: 3});
     TweenMax.to(smallEl, 3, {opacity: 1, top: '50%'});
     TweenMax.to(pressHereButton, 3, {bottom: 60, delay: 4});
+    TweenMax.to(loadSystemButton, 3, {bottom: 60, delay: 4});
+    TweenMax.to(unlockCameraButton, 3, {bottom: 60, delay: 4});
+    TweenMax.to(arrowRight, 3, {right: 60, delay: 4});
 
 
     this.solarSystem = new SolarSystem();
@@ -96,7 +104,7 @@ class App extends Component {
     // const radiusMin = 190; // Min radius of the planet belt.
     // const radiusMax = 300; // Max radius of the planet belt.
     const planetMinRadius = 10; // Min of planet radius.
-    const planetMaxRadius = 60; // Max of planet radius.
+    const planetMaxRadius = 50; // Max of planet radius.
     const asteroidMinRadius = 1;
     const asteroidMaxRadius = 3;
     const sunSize = 20; // Radius of sun
@@ -112,7 +120,7 @@ class App extends Component {
     let planetEnvironmentDecider = {
       1: 'MULTI BIOME',
       2: 'JUNGLE',
-      3: 'FOREST',
+      3: 'DESERT',
       4: 'ICE',
       5: 'DESERT',
       6: 'OCEAN'
@@ -284,7 +292,7 @@ class App extends Component {
     let homePlanetEnvironement = planetEnvironmentDecider[animalValue];
     let sun = sunDecider[value][animalValue];
     let planetsArr = []
-    let radiusMin = sun.size + 50;
+    let radiusMin = sun.size + 70;
     let radiusMax = sun.size + 300;
     let moonMinRadius = 5;
     let moonMaxRadius = 8;
@@ -401,16 +409,75 @@ class App extends Component {
 
     let recordName = 'system/' + systemName;
     this.record = this.client.record.getRecord(recordName);
+    this.list = this.client.record.getList('system');
+    this.list.addEntry(systemName);
     this.record.set({
       ...newProperties,
       planetsArr: null
     });
   }
 
-  loadSystem(properties) {
-    let loadedProperties = this.record.get();
-    this.solarSystem.setProperties(loadedProperties);
-    this.solarSystem.loadSystem(loadedProperties);
+  loadSystem() {
+    let el = document.getElementById('mainHeader');
+    let smallEl = document.getElementById('header');
+    let creationMenu = document.getElementById('creationMenu');
+
+    TweenMax.set(el, {display: 'none'});
+    TweenMax.set(smallEl, {display: 'none'});
+    TweenMax.set(creationMenu, {display: 'none'});
+
+    this.list = this.client.record.getList('system');
+
+    this.setState({loadingNotCreatingASystem: true, loading: true, showLoadSystemDialog: false});
+    const enteredSystemName = this.state.systemName;
+
+    this.list.whenReady((list) => {
+      let systemName = _.sample(list.getEntries());
+      let recordName = 'system/' + enteredSystemName;
+      this.record = this.client.record.getRecord(recordName);
+      this.record.whenReady((record) => {
+        let loadedProperties = record.get();
+
+        console.log(loadedProperties, enteredSystemName, '!');
+
+        this.solarSystem.setProperties(loadedProperties);
+        this.solarSystem.loadSystem(loadedProperties);
+        this.setState({
+          loading: false,
+          newSystem: loadedProperties
+        });
+      });
+    });
+  }
+
+  loadRandomSystem(properties) {
+    let el = document.getElementById('mainHeader');
+    let smallEl = document.getElementById('header');
+    let creationMenu = document.getElementById('creationMenu');
+
+    TweenMax.set(el, {display: 'none'});
+    TweenMax.set(smallEl, {display: 'none'});
+    TweenMax.set(creationMenu, {display: 'none'});
+
+    this.list = this.client.record.getList('system');
+
+    this.setState({loadingNotCreatingASystem: true, loading: true, showLoadSystemDialog: false, showButtons: true});
+
+    this.list.whenReady((list) => {
+      let systemName = _.sample(list.getEntries());
+      let recordName = 'system/' + systemName;
+      this.record = this.client.record.getRecord(recordName);
+      this.record.whenReady((record) => {
+        let loadedProperties = record.get();
+        this.solarSystem.setProperties(loadedProperties);
+        this.solarSystem.loadSystem(loadedProperties);
+        this.setState({
+          loading: false,
+          showLoadSystemDialog: false,
+          newSystem: loadedProperties
+        });
+      });
+    });
   }
 
   handleChange = (event, index, value) => this.setState({value});
@@ -442,7 +509,7 @@ class App extends Component {
       ...newSystem,
       landMassArr
     }});
-    console.log(landMassArr, addedLand);
+
     this.record.set({
       ...newSystem,
       planetsArr: null,
@@ -450,11 +517,50 @@ class App extends Component {
     });
   }
 
+  onAddTreeToHomePlanet() {
+    const { newSystem } = this.state;
+    let treeArr = newSystem.treeArr;
+    let addedTree = this.solarSystem.addTreeToHomePlanet();
+    treeArr = _.concat(treeArr, addedTree);
+
+    this.setState({
+      newSystem: {
+      ...newSystem,
+      treeArr
+    }});
+
+    this.record.set({
+      ...newSystem,
+      planetsArr: null,
+      treeArr
+    });
+  }
+
+  onAddCityToHomePlanet() {
+    const { newSystem } = this.state;
+    let cityArr = newSystem.cityArr;
+    let addedCity = this.solarSystem.addCitiesToHomePlanet();
+    cityArr = _.concat(cityArr, addedCity);
+
+    this.setState({
+      newSystem: {
+      ...newSystem,
+      cityArr
+    }});
+
+    this.record.set({
+      ...newSystem,
+      planetsArr: null,
+      cityArr
+    });
+  }
+
   getHomePlanetConfigurationModal() {
-    const { newSystem, configuringHomePlanet } = this.state;
+    const { newSystem, configuringHomePlanet, hideAllModals } = this.state;
     const menuClassMap = {
       'home-planet-modal': true,
-      'show': configuringHomePlanet
+      'show': configuringHomePlanet,
+      'hide': hideAllModals
     };
 
     return (
@@ -462,18 +568,19 @@ class App extends Component {
           <div>This Is Your Home Planet!</div>
           <h5>Your planet is a {newSystem.homePlanetEnvironement} Planet </h5>
           <h5>{`It is a very early in it's lifetime. A small civilization has started its journey on this planet!`}</h5>
-          <div className='generate-system-button' onClick={() => this.solarSystem.addTreeToHomePlanet()}>Add Trees</div>
-          <div className='generate-system-button' onClick={() => this.solarSystem.addCitiesToHomePlanet()}>Add Cities</div>
+          <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
+          <div className='generate-system-button' onClick={this.onAddCityToHomePlanet.bind(this)}>Add Cities</div>
           <div className='generate-system-button' onClick={this.onAddLandMassToHomePlanet.bind(this)}>Add Land</div>
+          <div className='generate-system-button' onClick={() => this.setState({hideAllModals: true})}>Close Modal</div>
       </div>
     );
   }
 
   getGeneratedSystemModal() {
-    const { newSystem, configuringHomePlanet } = this.state;
+    const { newSystem, configuringHomePlanet, hideAllModals } = this.state;
     const menuClassMap = {
       'generated-system-modal': true,
-      'hide': configuringHomePlanet
+      'hide': configuringHomePlanet || hideAllModals
     };
     const moonPlanets = newSystem.moonPlanetsArr.length;
     const ringPlanets = newSystem.asteroidBeltPlanetArr.length;
@@ -493,11 +600,41 @@ class App extends Component {
     );
   }
 
-  render() {
-    const { createSystem, generateNewSystem, loading } = this.state;
+  getLoadSystemDialog() {
+    const { createSystem, generateNewSystem, loading, loadingNotCreatingASystem, showLoadSystemDialog } = this.state;
     const buttonClassMap = {
       'create-system-button': true,
       'hide': createSystem
+    };
+    const menuClassMap = {
+      'load-system-menu': true,
+      'show': showLoadSystemDialog && !generateNewSystem,
+      'hide': !showLoadSystemDialog || generateNewSystem || loading
+    };
+
+    if (!showLoadSystemDialog) {
+      return (
+        <div className={classList(buttonClassMap)} onClick={() => this.setState({showLoadSystemDialog: true})} id='loadSystemButton'>Load System</div>
+      );
+    } else {
+      return (
+        <div className={classList(menuClassMap)} id='systemLoaderMenu'>
+            <div>Enter The Name of Solar System</div>
+            <MuiThemeProvider muiTheme={muiTheme}>
+              <TextField hintText="Enter a name..." ref='loadNameBox' value={this.state.systemName} onChange={this.handleNameChange}/>
+            </MuiThemeProvider>
+            <div className='generate-system-button' onClick={this.loadSystem.bind(this)}>Load</div>
+        </div>
+      );
+    }
+  }
+
+  render() {
+    const { createSystem, generateNewSystem, loading, loadingNotCreatingASystem, showButtons } = this.state;
+    const buttonClassMap = {
+      'create-system-button': true,
+      'hide': createSystem,
+      'show': showButtons
     };
 
     const menuClassMap = {
@@ -511,14 +648,20 @@ class App extends Component {
         <div className='main-container' id='mainContainer'>
           <div className='header' id='header'>Capital One Presents...</div>
           <div className='main-header' id='mainHeader'> Boulder Galaxy </div>
-          <button onClick={() => this.solarSystem.clearSolarSystem()}>Click to Test</button>
-          <button onClick={() => this.loadSystem(this.state.newSystem)}>Load Solar System</button>
+
           {loading ? <div className='loading-menu'>Generating Your Solar System</div> : null}
-          {generateNewSystem && !loading ? this.getSolarSystemName() : null}
-          {generateNewSystem && !loading ? this.getGeneratedSystemModal() : null}
+          {generateNewSystem && !loading || loadingNotCreatingASystem && !loading ? this.getSolarSystemName() : null}
+          {generateNewSystem && !loading && !loadingNotCreatingASystem ? this.getGeneratedSystemModal() : null}
           {generateNewSystem && !loading ? this.getHomePlanetConfigurationModal() : null}
-          <div className='unlock-camera-button' onClick={() => this.solarSystem.clearCameraAnimation()}>Unlock Camera</div>
+
+          <div className='arrow-right' onClick={() => this.loadRandomSystem()} id='arrowRight' />
+          <div className='unlock-camera-button' onClick={() => this.solarSystem.clearCameraAnimation()} id='unlockCameraButton'>Unlock Camera</div>
           <div className={classList(buttonClassMap)} onClick={this.onCreateSystemClick.bind(this)} id='pressHereButton'>Press Here to Create Your Own System</div>
+          {loadingNotCreatingASystem && !loading ?
+            <div className={classList(buttonClassMap)} onClick={() => this.solarSystem.followHomePlanet()} id='followHomePlanetButton'>Visit Home Planet!</div>
+            : null
+          }
+          {this.getLoadSystemDialog()}
           <div className={classList(menuClassMap)} id='creationMenu'>
               <div>Create Your Own System</div>
               <h5> Name your solar system </h5>

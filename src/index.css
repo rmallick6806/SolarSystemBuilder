@@ -87,8 +87,6 @@ body {
   text-shadow: 1px 1px grey;
   border: 10px dashed #f07464;
   border-radius: 5px;
-
-
 }
 
 .create-system-button {
@@ -192,7 +190,7 @@ body {
 }
 
 .create-system-menu.show {
-  display: block;
+  display: block !important;
 }
 
 .generate-system-button{
@@ -223,4 +221,65 @@ body {
   text-shadow: 1px 1px grey;
   border: 10px dashed #f07464;
   border-radius: 5px;
+}
+
+#loadSystemButton {
+  left: initial;
+  right: 60px;
+  width: initial;
+}
+
+#followHomePlanetButton {
+  left: initial;
+  right: 460px;
+  width: initial;
+}
+
+.arrow-right {
+  position: absolute;
+  right: 60px;
+  margin: auto;
+  top: 50%;
+  z-index: 2;
+
+  height: 100px;
+  width: 100px;
+  background: #f2c66d;
+  /*clip-path: polygon(50% 0%, 49% 100%, 100% 50%);*/
+  box-shadow: 1px 1px 6px 0px black;
+
+  -webkit-clip-path: polygon(75% 0%, 100% 50%, 75% 100%, 30% 100%, 52% 51%, 31% 0);
+  clip-path: polygon(75% 0%, 100% 50%, 75% 100%, 30% 100%, 52% 51%, 31% 0);
+
+}
+
+.arrow-right:active {
+  background: #f3a371;
+}
+
+.load-system-menu {
+  position: absolute;
+  bottom: 20px;
+  z-index: 1;
+  right: 60px;
+  margin: auto;
+  color: white;
+  width: 500px;
+  text-align: left;
+  background: #f2c66d;
+  font-family: Josefin Sans, serif;
+  padding: 30px 30px;
+  font-size: 28px;
+  box-shadow: 1px 1px 6px 0px black;
+  text-shadow: 1px 1px grey;
+  border: 10px dashed #f07464;
+  border-radius: 5px;
+}
+
+.home-planet-modal.hide {
+  display: none;
+}
+
+.create-system-button.show {
+  display: block;
 }

@@ -59,7 +59,8 @@ class SolarSystem {
       'green' : new THREE.MeshPhongMaterial({color: colors.green, shading: THREE.FlatShading}),
       'blue' : new THREE.MeshPhongMaterial({color: colors.blue, shading: THREE.FlatShading}),
       'orange' : new THREE.MeshPhongMaterial({color: colors.orange, shading: THREE.FlatShading}),
-      'blue' : new THREE.MeshPhongMaterial({color: colors.blue, shading: THREE.FlatShading})
+      'blue' : new THREE.MeshPhongMaterial({color: colors.blue, shading: THREE.FlatShading}),
+      'sun' : new THREE.MeshPhongMaterial({color: colors.sun, shading: THREE.FlatShading})
     };
     this.s1 = planetShape1(this.dynamicGeometry, this.material)
     this.s2 = planetShape2(this.dynamicGeometry, this.material)
@@ -178,9 +179,27 @@ class SolarSystem {
       depth: radius,
       radius
     });
-    let colorPicker = ['green', 'blue', 'orange', 'blue'];
-    let color = colorPicker[Math.floor(4 * Math.random())];
-    planet.material = this.colorMat[color];
+    let homePlanetEnvironement = this.properties.homePlanetEnvironement;
+    let envDecider = {
+      'MULTI': 'blue',
+      'DESERT': 'sun',
+      'FOREST': 'green',
+      'ICE': 'blue',
+      'OCEAN': 'blue'
+    };
+    let env;
+    let colorPicker;
+    let color;
+
+    if (homePlanetEnvironement && homePlanet) {
+      env = envDecider[homePlanetEnvironement];
+      color = env;
+    } else {
+      colorPicker = ['green', 'blue', 'orange', 'blue'];
+      color = colorPicker[Math.floor(4 * Math.random())];
+    };
+
+    planet.material = this.colorMat[color] || this.colorMat['blue'];
 
     // Planet data
     planet.data = {
@@ -206,7 +225,8 @@ class SolarSystem {
       z,
       rotationX,
       rotationY,
-      rotationZ
+      rotationZ,
+      homePlanet: homePlanet
     };
 
     // Set position & rotation.
@@ -366,10 +386,49 @@ class SolarSystem {
     const pointNormal = face.vertexNormals[0]; // it's normal (a=0)
     const quat = new THREE.Quaternion().setFromUnitVectors(upVec, pointNormal);
 
-    const group = new WHS.Group(cone); // = Object3D in Three.js
-    group.position.copy(point);
-    group.quaternion.copy(quat);
-    group.addTo(planet);
+    this.tree = new WHS.Group(cone); // = Object3D in Three.js
+
+    this.tree.data = {
+      pointX: point.x,
+      pointY: point.y,
+      pointZ: point.z,
+      pointNormalX: pointNormal.x,
+      pointNormalY: pointNormal.y,
+      pointNormalZ: pointNormal.z
+    };
+
+    this.tree.position.copy(point);
+    this.tree.quaternion.copy(quat);
+    this.tree.addTo(planet);
+    return this.tree.data;
+  }
+
+
+  loadTrees(properties, homePlanet) {
+    // Cone
+    const scale = 1;
+    const upVec = new THREE.Vector3(0, 1, 0);
+    _.forEach(properties.treeArr, (treeObj, i) => {
+      const cone = new WHS.Cone({
+        geometry: {
+          radius: scale / 2,
+          height: scale * 2
+        },
+
+        material: new THREE.MeshPhongMaterial({
+          color: colors.sun,
+        }),
+        position: [0, scale, 0]
+      });
+      const point = new THREE.Vector3(treeObj.pointX, treeObj.pointY, treeObj.pointZ);
+      const pointNormal = new THREE.Vector3(treeObj.pointNormalX, treeObj.pointNormalY, treeObj.pointNormalZ);
+      const quat = new THREE.Quaternion().setFromUnitVectors(upVec, pointNormal);
+      const tree = new WHS.Group(cone);
+
+      tree.position.copy(point);
+      tree.quaternion.copy(quat);
+      tree.addTo(homePlanet);
+    });
   }
 
   addCityToPlanet(planet) {
@@ -400,12 +459,60 @@ class SolarSystem {
     const faceNormal = face.normal;
     const quat = new THREE.Quaternion().setFromUnitVectors(upVec, faceNormal);
 
-    // let newestPoint = GeometryUtils.randomPointsInGeometry(sg, 20);
+    this.city = new WHS.Group(cube);
 
-    const group = new WHS.Group(cube); // = Object3D in Three.js
-    group.position.copy(point);
-    group.quaternion.copy(quat);
-    group.addTo(planet);
+    this.city.data = {
+      pointX: point.x,
+      pointY: point.y,
+      pointZ: point.z,
+      faceNormalX: faceNormal.x,
+      faceNormalY: faceNormal.y,
+      faceNormalZ: faceNormal.z
+    };
+
+    this.city.position.copy(point);
+    this.city.quaternion.copy(quat);
+    this.city.addTo(planet);
+
+    return this.city.data;
+  }
+
+  loadCity(properties, homePlanet) {
+    const scale = 2;
+    const upVec = new THREE.Vector3(0, 1, 0);
+    _.forEach(properties.cityArr, (cityObj, i) => {
+      const cube = new WHS.Box({
+        geometry: {
+          height: scale * 2,
+          width: scale * 1,
+          depth: scale * 2
+        },
+
+        material: new THREE.MeshPhongMaterial({
+          color: colors.blue,
+          shading: THREE.FlatShading
+        }),
+        position: [0, scale, 0]
+      });
+
+      const point = new THREE.Vector3(cityObj.pointX, cityObj.pointY, cityObj.pointZ);
+      const faceNormal = new THREE.Vector3(cityObj.faceNormalX, cityObj.faceNormalY, cityObj.faceNormalZ);
+      const quat = new THREE.Quaternion().setFromUnitVectors(upVec, faceNormal);
+      this.city = new WHS.Group(cube);
+
+      this.city.data = {
+        pointX: point.x,
+        pointY: point.y,
+        pointZ: point.z,
+        faceNormalX: faceNormal.x,
+        faceNormalY: faceNormal.y,
+        faceNormalZ: faceNormal.z
+      };
+
+      this.city.position.copy(point);
+      this.city.quaternion.copy(quat);
+      this.city.addTo(homePlanet);
+    });
   }
 
   addLandMassToPlanet(planet) {
@@ -515,6 +622,8 @@ class SolarSystem {
     this.planets = new WHS.Group();
     this.planets.addTo(this.space);
 
+    this.planetsArr = this.properties.planetsArr;
+
     for (let i = 0; i < this.properties.planetCount; i++) {
       this.properties.planetsArr[i].addTo(this.planets);
     }
@@ -615,10 +724,12 @@ class SolarSystem {
     this.planets.addTo(this.space);
 
     const planetsArr = [];
+    this.planetsArr = [];
     for (let i = 0; i < properties.storeablePlanetsData.length; i++) {
       let planet = this.loadPlanet(properties.storeablePlanetsData[i]);
       planet.addTo(this.planets);
       planetsArr.push(planet);
+      this.planetsArr.push(planet);
     }
 
     _.forEach(properties.storeableMoonData, (moon, j) => {
@@ -631,6 +742,16 @@ class SolarSystem {
     const homePlanet = planetsArr[homePlanetIdx];
 
     this.loadLandMass(properties, homePlanet);
+    this.loadTrees(properties, homePlanet);
+    this.loadCity(properties, homePlanet);
+
+    for (let k = 0; k < properties.asteroidBeltPlanetArr.length; k++) {
+      const planet = properties.asteroidBeltPlanetArr[k];
+      this.generateAsteroidBelt(planetsArr[planet.id]);
+      if (planet.rings === 2) {
+        this.generateAsteroidBelt(planetsArr[planet.id], 30, 'blue');
+      }
+    }
 
     let lastPlanet = _.last(properties.storeablePlanetsData);
     let lastPlanetDistance = lastPlanet.distance;
@@ -645,7 +766,8 @@ class SolarSystem {
   }
 
   followHomePlanet() {
-    const planetsArr = this.properties.planetsArr;
+    const planetsArr = this.planetsArr;
+
     const homePlanetIdx = _.findIndex(planetsArr, (planet) => { return planet.data.homePlanet});
     const planet = planetsArr[homePlanetIdx];
 
@@ -655,8 +777,8 @@ class SolarSystem {
     this.space.rotation.z -= Math.PI / 12;
     this.cameraAnimation = new WHS.Loop(() => {
 
-      var relativeCameraOffset = new THREE.Vector3(200,50,10);
-      var cameraOffset = relativeCameraOffset.applyMatrix4( planetsArr[homePlanetIdx].native.matrixWorld );
+      var relativeCameraOffset = new THREE.Vector3(200,50,50);
+      var cameraOffset = relativeCameraOffset.applyMatrix4( planet.native.matrixWorld );
 
       planet.rotation.y -= 1 / 30;
       this.camera.native.lookAt(planet.position);
@@ -706,6 +828,8 @@ class SolarSystem {
     // this.space.remove(this.landMass);
     this.planets.remove(this.moons);
     this.planets.remove(this.landMass);
+    this.planets.remove(this.asteroidBelt);
+    this.planets.remove(this.tree);
     this.space.remove(this.sun);
     this.space.remove(this.asteroidBelt);
     this.space.remove(this.solarAsteroidBelt);
@@ -717,7 +841,7 @@ class SolarSystem {
     const homePlanetIdx = _.findIndex(planetsArr, (planet) => { return planet.data.homePlanet});
     const planet = planetsArr[homePlanetIdx];
 
-    this.addTreeToPlanet(planet);
+    return this.addTreeToPlanet(planet);
   }
 
   addLandMassToHomePlanet() {
@@ -733,7 +857,7 @@ class SolarSystem {
     const homePlanetIdx = _.findIndex(planetsArr, (planet) => { return planet.data.homePlanet});
     const planet = planetsArr[homePlanetIdx];
 
-    this.addCityToPlanet(planet);
+    return this.addCityToPlanet(planet);
   }
 }
 
