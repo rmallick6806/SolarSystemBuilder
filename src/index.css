@@ -6,10 +6,16 @@
   to {top: 70px;}
 }
 
-body {
+body, .whs-app {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#714e96+34,63b6db+100 */
+  background: #714e96; /* Old browsers */
+  background: -moz-linear-gradient(top, #714e96 34%, #63b6db 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, #714e96 34%,#63b6db 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, #714e96 44%,#63b6db 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#714e96', endColorstr='#63b6db',GradientType=0 ); /* IE6-9 */
 }
 
 .header {

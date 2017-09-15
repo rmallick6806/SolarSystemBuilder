@@ -27,9 +27,10 @@ class SolarSystem {
       new WHS.SceneModule(),
       new WHS.DefineModule('camera', this.camera),
       new WHS.RenderingModule({
-        bgColor: 0x2a3340,
-
+        // bgColor: 0x2a3340,
+        bgOpacity: 0,
         renderer: {
+          alpha: true,
           antialias: true,
           shadowmap: {
             type: THREE.PCFSoftShadowMap
