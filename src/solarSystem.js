@@ -60,7 +60,7 @@ class SolarSystem {
       'green' : new THREE.MeshPhongMaterial({color: colors.green, shading: THREE.FlatShading}),
       'blue' : new THREE.MeshPhongMaterial({color: colors.blue, shading: THREE.FlatShading}),
       'orange' : new THREE.MeshPhongMaterial({color: colors.orange, shading: THREE.FlatShading}),
-      'blue' : new THREE.MeshPhongMaterial({color: colors.blue, shading: THREE.FlatShading}),
+      'purple' : new THREE.MeshPhongMaterial({color: new THREE.Color('#45285B'), shading: THREE.FlatShading}),
       'sun' : new THREE.MeshPhongMaterial({color: colors.sun, shading: THREE.FlatShading})
     };
     this.s1 = planetShape1(this.dynamicGeometry, this.material)
@@ -146,9 +146,9 @@ class SolarSystem {
     this.orbitModule.controls.minDistance = 90;
     this.orbitModule.controls.maxDistance = Infinity;
 
-    // const path = './assets/demo1.json';
+    // const path = './assets/blenderTree.obj';
     // new WHS.Importer({
-    //   loader: new THREE.JSONLoader(),
+    //   loader: new THREE.ObjectLoader(),
     //   url: path,
     //   geometry: {
     //       height: 10000*5,
@@ -165,7 +165,15 @@ class SolarSystem {
   }
 
   generatePlanet(i, homePlanet) {
-    let planet = [this.s1, this.s1, this.s4, this.s1][Math.ceil(Math.random() * 3)].clone();
+    let self = this;
+    let shapeDecider = {
+      'Tetrahedron': self.s1,
+      'Dodecahedron': self.s2,
+      'Diamond': self.s3,
+      'Sphere': self.s4
+    };
+    let shapePicker = _.sample(['Tetrahedron', 'Dodecahedron', 'Diamond', 'Sphere']);
+    let planet = shapeDecider[shapePicker].clone();
     const radius = this.properties.planetMinRadius + Math.random() * (this.properties.planetMaxRadius - this.properties.planetMinRadius);
 
     if (homePlanet) {
@@ -186,7 +194,7 @@ class SolarSystem {
       'DESERT': 'sun',
       'FOREST': 'green',
       'ICE': 'blue',
-      'OCEAN': 'blue'
+      'OCEAN': 'purple'
     };
     let env;
     let colorPicker;
@@ -196,18 +204,18 @@ class SolarSystem {
       env = envDecider[homePlanetEnvironement];
       color = env;
     } else {
-      colorPicker = ['green', 'blue', 'orange', 'blue'];
+      colorPicker = ['green', 'blue', 'orange', 'purple'];
       color = colorPicker[Math.floor(4 * Math.random())];
     };
 
     planet.material = this.colorMat[color] || this.colorMat['blue'];
-
+    console.log(planet.shape, '!');
     // Planet data
     planet.data = {
       distance: this.properties.radiusMin + i * (this.properties.radiusMax - this.properties.radiusMin),
       angle: Math.random() * Math.PI * 2,
       homePlanet: homePlanet,
-      shape: (planet instanceof WHS.Dodecahedron) ? 'Dodecahedron' : 'Sphere',
+      shape: shapePicker,
       radius,
       color
     };
@@ -245,7 +253,7 @@ class SolarSystem {
   generateMoon(planet, homePlanet, extraDistance = 0, planetIdx) {
     this.moons = new WHS.Group();
     this.moons.addTo(planet);
-    const moon = [this.s1, this.s1, this.s4, this.s1][Math.ceil(Math.random() * 3)].clone(),
+    const moon = _.sample([this.s1, this.s1, this.s4, this.s4, this.s1]).clone(),
       radius = this.properties.moonMinRadius + Math.random() * (this.properties.moonMaxRadius - this.properties.moonMinRadius);
 
     moon.g_({
@@ -637,7 +645,8 @@ class SolarSystem {
   }
 
   loadPlanet(planetObj) {
-    let shape = {'Dodecahedron': this.s1, 'Sphere': this.s4};
+    console.log(planetObj.shape);
+    let shape = {'Diamond': this.s3, 'Sphere': this.s4, 'Dodecahedron': this.s2, 'Tetrahedron': this.s1};
     let planet = shape[planetObj.shape].clone();
 
     const radius = planetObj.radius;

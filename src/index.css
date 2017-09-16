@@ -6,16 +6,37 @@
   to {top: 70px;}
 }
 
-body, .whs-app {
+body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#714e96+34,63b6db+100 */
-  background: #714e96; /* Old browsers */
-  background: -moz-linear-gradient(top, #714e96 34%, #63b6db 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top, #714e96 34%,#63b6db 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom, #714e96 44%,#63b6db 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#714e96', endColorstr='#63b6db',GradientType=0 ); /* IE6-9 */
+  background-image: url('./assets/stars.jpg');
+  background-position: cover;
+
+  /*background-color: #4f1b58;*/
+  /*background-color: linear-gradient(to bottom, #714e96 44%,#63b6db 100%);*/
+
+  background: -moz-linear-gradient(top, #714e96 34%, #1c89b9 100%);
+  background: -webkit-linear-gradient(top, #714e96 34%,#1c89b9 100%);
+  background: linear-gradient(to bottom, #714e96 44%,#1c89b9 100%);
+
+  /*background-image:
+  radial-gradient(white, rgba(255,255,255,0.0) 2px, transparent 40px),
+  radial-gradient(white, rgba(255,255,255,0.0) 1px, transparent 30px),
+  radial-gradient(white, rgba(255,255,255,0.0) 2px, transparent 40px),
+  radial-gradient(rgba(255,255,255,.4), rgba(255,255,255, 0.0) 2px, transparent 30px);
+  background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
+  background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;*/
+}
+
+.whs-app {
+  background-image:
+  radial-gradient(white, rgba(255,255,255,0.0) 2px, transparent 40px),
+  radial-gradient(white, rgba(255,255,255,0.0) 1px, transparent 30px),
+  radial-gradient(white, rgba(255,255,255,0.0) 2px, transparent 40px),
+  radial-gradient(rgba(255,255,255,.4), rgba(255,255,255, 0.0) 2px, transparent 30px);
+  background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
+  background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
 }
 
 .header {

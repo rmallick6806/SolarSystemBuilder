@@ -128,64 +128,64 @@ class App extends Component {
     let sunDecider = {
       1: {
         1: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.sun,
           type: 'Young Sun-like Star'
         },
         2: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.sun,
           type: 'Young Sun-like Star'
         },
         3: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.blue,
           type: 'Young Massive Blue Star'
         },
         4: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.blue,
           type: 'Young Massive Blue Star'
         },
         5: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.sun,
           type: 'Young Sun-like Star'
         },
         6: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.blue,
           type: 'Young Massive Blue Star'
         }
       },
       2: {
         1: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.sun,
           type: 'Young Sun-like Star'
         },
         2: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.sun,
           type: 'Young Sun-like Star'
         },
         3: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.blue,
           type: 'Massive Blue Star'
         },
         4: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.blue,
           type: 'Massive Blue Star'
         },
         5: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.sun,
           type: 'Young Sun-like Star'
         },
         6: {
-          size: _.sample(_.range(60, 90, 5)),
+          size: _.sample(_.range(100, 150, 5)),
           color: colors.blue,
           type: 'Massive Blue Star'
         }

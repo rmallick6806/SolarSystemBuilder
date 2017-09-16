@@ -2,7 +2,7 @@ import * as WHS from 'whs';
 import * as THREE from 'three';
 
 const star = function(radius, color) {
-  return new WHS.Tetrahedron({
+  return new WHS.Octahedron({
     geometry: {
       radius,
       detail: 2
@@ -32,12 +32,13 @@ const landMass = function(dynamicGeometry, material) {
 }
 
 const planetShape1 = function(dynamicGeometry, material) {
-  return new WHS.Dodecahedron({
+  return new WHS.Tetrahedron({
     geometry: {
       buffer: true,
-      radius: 10
+      radius: 10,
+      detail: 2
     },
-
+    shape: 'Tetrahedron',
     modules: [
       dynamicGeometry
     ],
@@ -46,14 +47,14 @@ const planetShape1 = function(dynamicGeometry, material) {
 };
 
 const planetShape2 = function(dynamicGeometry, material) {
-  return new WHS.Box({
+  return new WHS.Dodecahedron({
     geometry: {
       buffer: true,
       width: 10,
       height: 10,
       depth: 10
     },
-
+    shape: 'Dodecahedron',
     modules: [
       dynamicGeometry
     ],
@@ -63,14 +64,15 @@ const planetShape2 = function(dynamicGeometry, material) {
 };
 
 const planetShape3 = function(dynamicGeometry, material) {
-  return new WHS.Cylinder({
+  return new WHS.Octahedron({
    geometry: {
      buffer: true,
      radiusTop: 0,
      radiusBottom: 10,
-     height: 10
+     height: 10,
+     detail: 0
    },
-
+   type: 'Diamond',
    modules: [
      dynamicGeometry
    ],
@@ -80,12 +82,13 @@ const planetShape3 = function(dynamicGeometry, material) {
 }
 
 const planetShape4 = function (dynamicGeometry, material) {
-  return new WHS.Sphere({
+  return new WHS.Octahedron({
     geometry: {
       buffer: true,
-      radius: 10
+      radius: 10,
+      detail: 2
     },
-
+    type: 'Sphere',
     modules: [
       dynamicGeometry
     ],
@@ -102,7 +105,6 @@ const homePlanet = function (dynamicGeometry, material) {
       widthSegments: 32,
       heightSegments: 32
     },
-
     modules: [
       dynamicGeometry
     ],
