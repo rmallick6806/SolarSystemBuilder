@@ -38,7 +38,6 @@ class SolarSystem {
         }
       }, {shadow: true}),
       this.orbitModule,
-      new WHS.ResizeModule(),
       this.mouse
     ]);
     this.space = new WHS.Group();
@@ -77,12 +76,22 @@ class SolarSystem {
     // LIGHTS.
     Lights.DirectionalLight.addTo(this.app);
     Lights.AmbientLight.addTo(this.app);
-    // new WHS.PointLight( {
+    // this.sunLight = new WHS.PointLight( {
     //   color: 0xffffff,
-    //   intensity: 10,
+    //   intensity: 7,
     //   distance: 20000,
     //   position: [100, 200, 200]
-    // }).addTo(this.app);
+    // });
+    //
+    // this.sunLight2 = new WHS.PointLight( {
+    //   color: 0xffffff,
+    //   intensity: 7,
+    //   distance: 20000,
+    //   position: [-200, -100, 0]
+    // });
+    //
+    // this.sunLight.addTo(this.app);
+    // this.sunLight2.addTo(this.app);
 
   }
 
@@ -190,11 +199,12 @@ class SolarSystem {
     });
     let homePlanetEnvironement = this.properties.homePlanetEnvironement;
     let envDecider = {
-      'MULTI': 'blue',
+      'MULTI BIOME': 'blue',
       'DESERT': 'sun',
       'FOREST': 'green',
       'ICE': 'blue',
-      'OCEAN': 'purple'
+      'OCEAN': 'blue',
+      'JUNGLE': 'purple'
     };
     let env;
     let colorPicker;
@@ -209,7 +219,7 @@ class SolarSystem {
     };
 
     planet.material = this.colorMat[color] || this.colorMat['blue'];
-    console.log(planet.shape, '!');
+
     // Planet data
     planet.data = {
       distance: this.properties.radiusMin + i * (this.properties.radiusMax - this.properties.radiusMin),
@@ -767,6 +777,26 @@ class SolarSystem {
     let lastPlanetDistance = lastPlanet.distance;
 
     this.generateSolarAsteroidBelt(this.sun, 3, 6, lastPlanetDistance + 100);
+
+
+    // this.sunLight = new WHS.PointLight( {
+    //   color: 0xffffff,
+    //   intensity: 3,
+    //   distance: 20000,
+    //   position: [properties.sunSize + 20, properties.sunSize + 20, properties.sunSize + 20]
+    // });
+    //
+    // this.sunLight2 = new WHS.PointLight( {
+    //   color: 0xffffff,
+    //   intensity: 3,
+    //   distance: 20000,
+    //   position: [-properties.sunSize - 20, -properties.sunSize - 20, 0]
+    // });
+    //
+    // this.sunLight.addTo(this.app);
+    // this.sunLight2.addTo(this.app);
+
+
     this.animation.start();
   }
 
@@ -787,13 +817,18 @@ class SolarSystem {
     this.space.rotation.z -= Math.PI / 12;
     this.cameraAnimation = new WHS.Loop(() => {
 
-      var relativeCameraOffset = new THREE.Vector3(200,50,50);
+      var relativeCameraOffset = new THREE.Vector3(50,50,50);
       var cameraOffset = relativeCameraOffset.applyMatrix4( planet.native.matrixWorld );
 
-      planet.rotation.y -= 1 / 30;
+      planet.rotation.y -= 2 / 30;
+
+      // this.camera.position.x = cameraOffset.x;
+      // this.camera.position.y = cameraOffset.y;
+      // this.camera.position.z = cameraOffset.z;
+
       this.camera.native.lookAt(planet.position);
 
-      this.camera.position.set(planet.position.x + 100, planet.position.y + 100, planet.position.z + 100);
+      this.camera.position.set(planet.position.x + 50, planet.position.y + 50, planet.position.z + 50);
     });
 
     this.app.addLoop(this.cameraAnimation);
@@ -828,9 +863,38 @@ class SolarSystem {
     });
   }
 
+  randomView() {
+    const planet = _.sample(this.planetsArr);
+    const anotherPlanet = _.sample(this.planetsArr);
+
+    if (this.cameraAnimation) {
+      this.cameraAnimation.stop();
+    }
+    this.space.rotation.z -= Math.PI / 12;
+    this.cameraAnimation = new WHS.Loop(() => {
+      planet.rotation.y -= 2 / 30;
+      var relativeCameraOffset = new THREE.Vector3(0,200,0);
+      var cameraOffset = relativeCameraOffset.applyMatrix4( planet.native.matrixWorld );
+      //
+      this.camera.position.x = cameraOffset.x;
+      this.camera.position.y = cameraOffset.y;
+      this.camera.position.z = cameraOffset.z;
+
+      this.camera.native.lookAt(anotherPlanet.position);
+      this.camera.native.zoom = 2000;
+      // this.camera.position.set(planet.position.x + 100, planet.position.y + 100, planet.position.z + 100);
+    });
+
+    this.app.addLoop(this.cameraAnimation);
+    this.cameraAnimation.start();
+  }
+
   clearSolarSystem() {
     this.animation.stop();
     this.landMass = new WHS.Group();
+
+    this.app.remove(this.sunLight);
+    this.app.remove(this.sunLight2);
 
     this.cameraAnimation.stop();
     this.space.remove(this.planets);

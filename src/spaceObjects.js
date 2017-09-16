@@ -38,7 +38,6 @@ const planetShape1 = function(dynamicGeometry, material) {
       radius: 10,
       detail: 2
     },
-    shape: 'Tetrahedron',
     modules: [
       dynamicGeometry
     ],
@@ -54,7 +53,6 @@ const planetShape2 = function(dynamicGeometry, material) {
       height: 10,
       depth: 10
     },
-    shape: 'Dodecahedron',
     modules: [
       dynamicGeometry
     ],
@@ -72,7 +70,6 @@ const planetShape3 = function(dynamicGeometry, material) {
      height: 10,
      detail: 0
    },
-   type: 'Diamond',
    modules: [
      dynamicGeometry
    ],
@@ -88,7 +85,6 @@ const planetShape4 = function (dynamicGeometry, material) {
       radius: 10,
       detail: 2
     },
-    type: 'Sphere',
     modules: [
       dynamicGeometry
     ],

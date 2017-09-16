@@ -37,6 +37,9 @@ body {
   radial-gradient(rgba(255,255,255,.4), rgba(255,255,255, 0.0) 2px, transparent 30px);
   background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
   background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+
+  width: 1vh;
+  height: 1vh;
 }
 
 .header {
@@ -309,4 +312,21 @@ body {
 
 .create-system-button.show {
   display: block;
+}
+
+.system-counter{
+  position: absolute;
+  top: 60px;
+  z-index: 1;
+  left: 60px;
+  color: white;
+  text-align: left;
+  background: #f2c66d;
+  font-family: Josefin Sans, serif;
+  padding: 30px 30px;
+  font-size: 28px;
+  box-shadow: 1px 1px 6px 0px black;
+  text-shadow: 1px 1px grey;
+  border: 10px dashed #f07464;
+  border-radius: 5px;
 }

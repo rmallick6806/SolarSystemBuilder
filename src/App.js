@@ -53,6 +53,19 @@ class App extends Component {
     TweenMax.to(arrowRight, 3, {right: 60, delay: 4});
 
 
+    _.delay(() => {
+      TweenMax.to(el, 3, {opacity: 1, top: '60px'});
+      TweenMax.to(smallEl, 3, {opacity: 0, top: '40px'});
+    }, 5000)
+
+    this.list = this.client.record.getList('system');
+    this.list.whenReady((list) => {
+      this.setState({
+        systemCount: list.getEntries().length
+      });
+    });
+
+
     this.solarSystem = new SolarSystem();
     const radiusMin = 190, // Min radius of the planet belt.
       radiusMax = 300, // Max radius of the planet belt.
@@ -125,6 +138,7 @@ class App extends Component {
       5: 'DESERT',
       6: 'OCEAN'
     };
+
     let sunDecider = {
       1: {
         1: {
@@ -564,42 +578,42 @@ class App extends Component {
     };
 
     const homePlanetEnvironement = newSystem.homePlanetEnvironement;
-    const buttonDecider = function() {
-      switch (homePlanetEnvironement) {
-        case 'MULTI':
-          return <div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-          </div>
-          break;
-        case 'DESERT':
-          return <div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-          </div>
-          break;
-        case 'FOREST':
-          return <div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-          </div>
-          break;
-        case 'ICE':
-          return <div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-          </div>
-          break;
-        case 'OCEAN':
-          return <div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-            <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-          </div>
-          break;
-        default:
-
-      }
-    }
+    // const buttonDecider = function() {
+    //   switch (homePlanetEnvironement) {
+    //     case 'MULTI':
+    //       return <div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
+    //       </div>
+    //       break;
+    //     case 'DESERT':
+    //       return <div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
+    //       </div>
+    //       break;
+    //     case 'FOREST':
+    //       return <div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
+    //       </div>
+    //       break;
+    //     case 'ICE':
+    //       return <div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
+    //       </div>
+    //       break;
+    //     case 'OCEAN':
+    //       return <div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
+    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
+    //       </div>
+    //       break;
+    //     default:
+    //
+    //   }
+    // }
 
     return (
       <div className={classList(menuClassMap)} id='creationMenu'>
@@ -667,6 +681,24 @@ class App extends Component {
     }
   }
 
+  getPlanetCounter() {
+    return (
+      <div className='system-counter'>{this.state.systemCount} Solar Systems in this Galaxy</div>
+    );
+  }
+
+  toggleCameraControl() {
+    const prettyCamAvailable = this.state.prettyCamAvailable;
+
+    if (!prettyCamAvailable) {
+      this.solarSystem.clearCameraAnimation();
+    } else {
+      this.solarSystem.randomView();
+    }
+
+    this.setState({prettyCamAvailable: !prettyCamAvailable});
+  }
+
   render() {
     const { createSystem, generateNewSystem, loading, loadingNotCreatingASystem, showButtons } = this.state;
     const buttonClassMap = {
@@ -693,7 +725,9 @@ class App extends Component {
           {generateNewSystem && !loading ? this.getHomePlanetConfigurationModal() : null}
 
           <div className='arrow-right' onClick={() => this.loadRandomSystem()} id='arrowRight' />
-          <div className='unlock-camera-button' onClick={() => this.solarSystem.clearCameraAnimation()} id='unlockCameraButton'>Unlock Camera</div>
+          <div className='unlock-camera-button' onClick={this.toggleCameraControl.bind(this)} id='unlockCameraButton'>
+            {(this.state.prettyCamAvailable) ? 'Random View' : 'Unlock Camera'}
+          </div>
           <div className={classList(buttonClassMap)} onClick={this.onCreateSystemClick.bind(this)} id='pressHereButton'>Press Here to Create Your Own System</div>
           {loadingNotCreatingASystem && !loading ?
             <div className={classList(buttonClassMap)} onClick={() => this.solarSystem.followHomePlanet()} id='followHomePlanetButton'>Visit Home Planet!</div>
