@@ -893,8 +893,8 @@ class SolarSystem {
     this.animation.stop();
     this.landMass = new WHS.Group();
 
-    this.app.remove(this.sunLight);
-    this.app.remove(this.sunLight2);
+    // this.app.remove(this.sunLight);
+    // this.app.remove(this.sunLight2);
 
     this.cameraAnimation.stop();
     this.space.remove(this.planets);
