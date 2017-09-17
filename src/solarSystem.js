@@ -5,8 +5,9 @@ import * as Lights from './lights.js';
 import { star, planetShape1, planetShape2, planetShape3, planetShape4, homePlanet, landMass } from './spaceObjects.js';
 import _ from 'lodash';
 
-import GeometryUtils from './GeometryUtils.js';
+import { VRModule } from 'whs-vrkit';
 
+import GeometryUtils from './GeometryUtils.js';
 
 class SolarSystem {
   constructor() {
@@ -38,7 +39,8 @@ class SolarSystem {
         }
       }, {shadow: true}),
       this.orbitModule,
-      this.mouse
+      this.mouse,
+      // new VRModule()
     ]);
     this.space = new WHS.Group();
     this.planets = new WHS.Group();
@@ -118,7 +120,6 @@ class SolarSystem {
 
     this.generateSolarAsteroidBelt(this.sun, 3, 6, lastPlanetDistance + 100);
 
-    // Animating rotating shapes around planet.
     this.animation = new WHS.Loop(() => {
       const planetObjs = this.planets.children;
       for (let i = 0, max = planetObjs.length; i < max; i++) {
@@ -155,20 +156,17 @@ class SolarSystem {
     this.orbitModule.controls.minDistance = 90;
     this.orbitModule.controls.maxDistance = Infinity;
 
-    // const path = './assets/blenderTree.obj';
-    // new WHS.Importer({
-    //   loader: new THREE.ObjectLoader(),
-    //   url: path,
-    //   geometry: {
-    //       height: 10000*5,
-    //       width: 10000*5,
-    //       radius: 10000*5
-    //     },
-    //   parser(geometry, material) { // data from loader
-    //     return new THREE.Mesh(geometry, material); // should return your .native (mesh in this case)
-    //   },
-    //   position: [0, 100, 0]
-    // }).addTo(this.app);
+    const path = './assets/fox.obj';
+    new WHS.Importer({
+      loader: new THREE.ObjectLoader(),
+      url: path,
+      geometry: {
+          height: 10000*5,
+          width: 10000*5,
+          radius: 10000*5
+        },
+      position: [0, 100, 0]
+    }).addTo(this.app);
 
     this.app.start()
   }
@@ -394,6 +392,7 @@ class SolarSystem {
 
       material: new THREE.MeshPhongMaterial({
         color: colors.green,
+        shading: THREE.FlatShading
       }),
       position: [0, scale, 0]
     });
@@ -422,6 +421,48 @@ class SolarSystem {
     return this.tree.data;
   }
 
+  addVolcano(planet) {
+    const normalsHelper = new THREE.VertexNormalsHelper(planet.native);
+    const radius = this.properties.moonMinRadius + Math.random() * (this.properties.moonMaxRadius - this.properties.moonMinRadius);
+    const scale = 1;
+    const volcano = this.landMassShape.clone();
+
+    volcano.g_({
+      radiusBottom: radius * 0.7,
+      radiusTop: radius * 0.2,
+      height: volcano instanceof WHS.Cylinder ? radius * 2/5 : radius,
+      width: radius/2,
+      depth: radius/2,
+      radius
+    });
+
+    volcano.material = new THREE.MeshPhongMaterial({color: colors.orange, shading: THREE.FlatShading});
+
+    const upVec = new THREE.Vector3(0, 1, 0);
+    const sg = planet.geometry;
+    sg.computeVertexNormals(); // compute normals for each vertex
+    const face = _.sample(sg.faces); // the actual face
+    const point = sg.vertices[face.a]; // selected vertice (can be a, b or c)
+    const pointNormal = face.vertexNormals[0]; // it's normal (a=0)
+    const quat = new THREE.Quaternion().setFromUnitVectors(upVec, pointNormal);
+
+    this.volcano = new WHS.Group(volcano); // = Object3D in Three.js
+
+    this.volcano.data = {
+      radius,
+      pointX: point.x,
+      pointY: point.y,
+      pointZ: point.z,
+      pointNormalX: pointNormal.x,
+      pointNormalY: pointNormal.y,
+      pointNormalZ: pointNormal.z
+    };
+
+    this.volcano.position.copy(point);
+    this.volcano.quaternion.copy(quat);
+    this.volcano.addTo(planet);
+    return this.volcano.data;
+  }
 
   loadTrees(properties, homePlanet) {
     // Cone
@@ -436,6 +477,7 @@ class SolarSystem {
 
         material: new THREE.MeshPhongMaterial({
           color: colors.sun,
+          shading: THREE.FlatShading
         }),
         position: [0, scale, 0]
       });
@@ -447,6 +489,33 @@ class SolarSystem {
       tree.position.copy(point);
       tree.quaternion.copy(quat);
       tree.addTo(homePlanet);
+    });
+  }
+
+  loadVolcano(properties, homePlanet) {
+    const upVec = new THREE.Vector3(0, 1, 0);
+    _.forEach(properties.volcanoArr, (volcanoObj, i) => {
+      const radius = volcanoObj.radius;
+      const volcano = this.landMassShape.clone();
+
+      volcano.g_({
+        radiusBottom: radius * 0.7,
+        radiusTop: radius * 0.2,
+        height: volcano instanceof WHS.Cylinder ? radius * 2/5 : radius,
+        width: radius/2,
+        depth: radius/2,
+        radius
+      });
+
+      volcano.material = new THREE.MeshPhongMaterial({color: colors.orange, shading: THREE.FlatShading});
+      const point = new THREE.Vector3(volcanoObj.pointX, volcanoObj.pointY, volcanoObj.pointZ);
+      const pointNormal = new THREE.Vector3(volcanoObj.pointNormalX, volcanoObj.pointNormalY, volcanoObj.pointNormalZ);
+      const quat = new THREE.Quaternion().setFromUnitVectors(upVec, pointNormal);
+      this.volcano = new WHS.Group(volcano);
+
+      this.volcano.position.copy(point);
+      this.volcano.quaternion.copy(quat);
+      this.volcano.addTo(homePlanet);
     });
   }
 
@@ -467,6 +536,15 @@ class SolarSystem {
       }),
       position: [0, scale, 0]
     });
+
+    // const cube2 = cube.clone(false, true);
+    // cube2.position.x += 4.1;
+    // cube2.geometry.height = scale * 1;
+    //
+    // const cube3 = cube.clone(false, true);
+    // cube3.position.y += -3.2;
+    // cube3.geometry.height = scale * 3;
+
     const upVec = new THREE.Vector3(0, 1, 0);
     const sg = planet.geometry;
     sg.computeVertexNormals();
@@ -751,11 +829,13 @@ class SolarSystem {
       planetsArr.push(planet);
       this.planetsArr.push(planet);
     }
-
+    this.moonsArr = [];
     _.forEach(properties.storeableMoonData, (moon, j) => {
       this.moons = new WHS.Group();
       this.moons.addTo(planetsArr[moon.planetIdx]);
-      this.loadMoon(moon, planetsArr[moon.planetIdx]).addTo(this.moons);
+      let moonObj = this.loadMoon(moon, planetsArr[moon.planetIdx]);
+      moonObj.addTo(this.moons);
+      this.moonsArr.push(moonObj);
     });
 
     const homePlanetIdx = _.findIndex(planetsArr, (planet) => { return planet.data.homePlanet});
@@ -764,6 +844,7 @@ class SolarSystem {
     this.loadLandMass(properties, homePlanet);
     this.loadTrees(properties, homePlanet);
     this.loadCity(properties, homePlanet);
+    this.loadVolcano(properties, homePlanet);
 
     for (let k = 0; k < properties.asteroidBeltPlanetArr.length; k++) {
       const planet = properties.asteroidBeltPlanetArr[k];
@@ -796,8 +877,7 @@ class SolarSystem {
     // this.sunLight.addTo(this.app);
     // this.sunLight2.addTo(this.app);
 
-
-    this.animation.start();
+    this.startAnimation();
   }
 
   clearCameraAnimation() {
@@ -827,7 +907,6 @@ class SolarSystem {
       // this.camera.position.z = cameraOffset.z;
 
       this.camera.native.lookAt(planet.position);
-
       this.camera.position.set(planet.position.x + 50, planet.position.y + 50, planet.position.z + 50);
     });
 
@@ -889,9 +968,48 @@ class SolarSystem {
     this.cameraAnimation.start();
   }
 
+  startAnimation() {
+    if (this.animation) {
+      this.animation.stop();
+    }
+
+    this.animation = new WHS.Loop(() => {
+      const planetObjs = this.planets.children;
+      for (let i = 0, max = planetObjs.length; i < max; i++) {
+        const planetObj = planetObjs[i];
+
+        planetObj.data.angle += 0.009 / (planetObj.data.distance / this.properties.radiusMax);
+
+        planetObj.position.x = (Math.cos(planetObj.data.angle) * planetObj.data.distance);
+        planetObj.position.z = (Math.sin(planetObj.data.angle) * planetObj.data.distance);
+
+        // planetObj.rotation.x += 1 / 60;
+        planetObj.rotation.y += 2 / 30;
+        if (this.asteroidBelt) {
+          this.asteroidBelt.rotation.y += 2/500;
+        }
+
+        if (this.moons) {
+          this.moons.rotation.x += 2/500;
+        }
+        // this.camera.position.set(planetObjs[3].position.x + 200, planetObjs[3].position.y + 200, planetObjs[3].position.z + 200);
+      }
+
+      // _.forEach(this.moonsArr, (moon) => {
+      //   moon.rotation.x += 2/500;
+      // });
+
+      this.sun.rotation.y -= 0.005;
+    });
+
+    this.app.addLoop(this.animation);
+    this.animation.start();
+  }
+
   clearSolarSystem() {
     this.animation.stop();
     this.landMass = new WHS.Group();
+    this.volcano = new WHS.Group();
 
     // this.app.remove(this.sunLight);
     // this.app.remove(this.sunLight2);
@@ -904,6 +1022,7 @@ class SolarSystem {
     this.planets.remove(this.landMass);
     this.planets.remove(this.asteroidBelt);
     this.planets.remove(this.tree);
+    // this.planets.remove(this.volcano);
     this.space.remove(this.sun);
     this.space.remove(this.asteroidBelt);
     this.space.remove(this.solarAsteroidBelt);
@@ -932,6 +1051,14 @@ class SolarSystem {
     const planet = planetsArr[homePlanetIdx];
 
     return this.addCityToPlanet(planet);
+  }
+
+  addVolcanoToHomePlanet() {
+    const planetsArr = this.properties.planetsArr;
+    const homePlanetIdx = _.findIndex(planetsArr, (planet) => { return planet.data.homePlanet});
+    const planet = planetsArr[homePlanetIdx];
+
+    return this.addVolcano(planet);
   }
 }
 

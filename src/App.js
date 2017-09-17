@@ -414,7 +414,8 @@ class App extends Component {
       moonPlanetsArr,
       landMassArr: [],
       cityArr: [],
-      treeArr: []
+      treeArr: [],
+      volcanoArr: []
     };
 
     this.solarSystem.generateCrazyPlanet();
@@ -451,8 +452,6 @@ class App extends Component {
       this.record = this.client.record.getRecord(recordName);
       this.record.whenReady((record) => {
         let loadedProperties = record.get();
-
-        console.log(loadedProperties, enteredSystemName, '!');
 
         this.solarSystem.setProperties(loadedProperties);
         this.solarSystem.loadSystem(loadedProperties);
@@ -550,6 +549,25 @@ class App extends Component {
     });
   }
 
+  onAddVolcanoToHomePlanet() {
+    const { newSystem } = this.state;
+    let volcanoArr = newSystem.volcanoArr;
+    let addedVolcano = this.solarSystem.addVolcanoToHomePlanet();
+    volcanoArr = _.concat(volcanoArr, addedVolcano);
+
+    this.setState({
+      newSystem: {
+      ...newSystem,
+      volcanoArr
+    }});
+
+    this.record.set({
+      ...newSystem,
+      planetsArr: null,
+      volcanoArr
+    });
+  }
+
   onAddCityToHomePlanet() {
     const { newSystem } = this.state;
     let cityArr = newSystem.cityArr;
@@ -569,6 +587,45 @@ class App extends Component {
     });
   }
 
+  buttonDecider(homePlanetEnvironement) {
+    switch (homePlanetEnvironement) {
+      case 'MULTI BIOME':
+        return <div>
+          <div className='generate-system-button' onClick={this.onAddVolcanoToHomePlanet.bind(this)}>Add Volcanoes</div>
+        </div>
+        break;
+      case 'DESERT':
+        return <div>
+          <div className='generate-system-button' onClick={this.onAddVolcanoToHomePlanet.bind(this)}>Add Volcanoes</div>
+        </div>
+        break;
+      case 'FOREST':
+        return <div>
+          <div className='generate-system-button' onClick={this.onAddVolcanoToHomePlanet.bind(this)}>Add Volcanoes</div>
+        </div>
+        break;
+      case 'ICE':
+        return <div>
+          <div className='generate-system-button' onClick={this.onAddVolcanoToHomePlanet.bind(this)}>Add Volcanoes</div>
+        </div>
+        break;
+      case 'OCEAN':
+        return <div>
+          <div className='generate-system-button' onClick={this.onAddVolcanoToHomePlanet.bind(this)}>Add Volcanoes</div>
+        </div>
+        break;
+      case 'JUNGLE':
+        return <div>
+          <div className='generate-system-button' onClick={this.onAddVolcanoToHomePlanet.bind(this)}>Add Volcanoes</div>
+        </div>
+        break;
+      default:
+      return <div>
+        <div className='generate-system-button' onClick={this.onAddVolcanoToHomePlanet.bind(this)}>Add Volcanoes</div>
+      </div>
+    };
+  }
+
   getHomePlanetConfigurationModal() {
     const { newSystem, configuringHomePlanet, hideAllModals } = this.state;
     const menuClassMap = {
@@ -578,48 +635,13 @@ class App extends Component {
     };
 
     const homePlanetEnvironement = newSystem.homePlanetEnvironement;
-    // const buttonDecider = function() {
-    //   switch (homePlanetEnvironement) {
-    //     case 'MULTI':
-    //       return <div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-    //       </div>
-    //       break;
-    //     case 'DESERT':
-    //       return <div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-    //       </div>
-    //       break;
-    //     case 'FOREST':
-    //       return <div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-    //       </div>
-    //       break;
-    //     case 'ICE':
-    //       return <div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-    //       </div>
-    //       break;
-    //     case 'OCEAN':
-    //       return <div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
-    //         <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Volcanoes</div>
-    //       </div>
-    //       break;
-    //     default:
-    //
-    //   }
-    // }
 
     return (
       <div className={classList(menuClassMap)} id='creationMenu'>
           <div>This Is Your Home Planet!</div>
           <h5>Your planet is a {newSystem.homePlanetEnvironement} Planet </h5>
           <h5>{`It is a very early in it's lifetime. A small civilization has started its journey on this planet!`}</h5>
+          {this.buttonDecider(homePlanetEnvironement)}
           <div className='generate-system-button' onClick={this.onAddTreeToHomePlanet.bind(this)}>Add Trees</div>
           <div className='generate-system-button' onClick={this.onAddCityToHomePlanet.bind(this)}>Add Cities</div>
           <div className='generate-system-button' onClick={this.onAddLandMassToHomePlanet.bind(this)}>Add Land</div>
