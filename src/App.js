@@ -738,7 +738,7 @@ class App extends Component {
     return (
       <div className="App">
         <div className='main-container' id='mainContainer'>
-          <div className='header' id='header'>Capital One Presents...</div>
+          <div className='header' id='header'>Presenting..</div>
           <div className='main-header' id='mainHeader'> Boulder Galaxy </div>
 
           {loading ? <div className='loading-menu'>Generating Your Solar System</div> : null}
