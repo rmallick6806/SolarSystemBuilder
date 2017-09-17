@@ -5,7 +5,7 @@ import * as Lights from './lights.js';
 import { star, planetShape1, planetShape2, planetShape3, planetShape4, homePlanet, landMass } from './spaceObjects.js';
 import _ from 'lodash';
 
-import { VRModule } from 'whs-vrkit';
+// import * as VRKit from 'whs/modules/VRKit';
 
 import GeometryUtils from './GeometryUtils.js';
 
@@ -40,7 +40,7 @@ class SolarSystem {
       }, {shadow: true}),
       this.orbitModule,
       this.mouse,
-      // new VRModule()
+      // new VRKit.VRModule()
     ]);
     this.space = new WHS.Group();
     this.planets = new WHS.Group();
