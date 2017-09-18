@@ -40,17 +40,17 @@ class App extends Component {
     let arrowRight = document.getElementById('arrowRight');
     TweenMax.set(el, {opacity: 0});
     TweenMax.set(smallEl, {opacity: 0});
-    TweenMax.set(pressHereButton, {bottom: -300});
-    TweenMax.set(loadSystemButton, {bottom: -300});
-    TweenMax.set(unlockCameraButton, {bottom: -300});
-    TweenMax.set(arrowRight, {right: -300});
+    TweenMax.set(pressHereButton, {opacity: 0, bottom: 60});
+    TweenMax.set(loadSystemButton, {opacity: 0, bottom: 60});
+    TweenMax.set(unlockCameraButton, {opacity: 0, bottom: 60});
+    TweenMax.set(arrowRight, {opacity: 0, right: 60});
 
     TweenMax.to(el, 3, {opacity: 1, delay: 3});
     TweenMax.to(smallEl, 3, {opacity: 1, top: '50%'});
-    TweenMax.to(pressHereButton, 3, {bottom: 60, delay: 4});
-    TweenMax.to(loadSystemButton, 3, {bottom: 60, delay: 4});
-    TweenMax.to(unlockCameraButton, 3, {bottom: 60, delay: 4});
-    TweenMax.to(arrowRight, 3, {right: 60, delay: 4});
+    TweenMax.to(pressHereButton, 3, {opacity: 1, delay: 4});
+    TweenMax.to(loadSystemButton, 3, {opacity: 1, delay: 4});
+    TweenMax.to(unlockCameraButton, 3, {opacity: 1, delay: 4});
+    TweenMax.to(arrowRight, 3, {opacity: 1, delay: 4});
 
 
     _.delay(() => {
