@@ -5,9 +5,10 @@ import * as Lights from './lights.js';
 import { star, planetShape1, planetShape2, planetShape3, planetShape4, homePlanet, landMass } from './spaceObjects.js';
 import _ from 'lodash';
 
-// import * as VRKit from 'whs/modules/VRKit';
+import * as VRKit from 'whs/modules/VRKit';
 
 import GeometryUtils from './GeometryUtils.js';
+
 
 class SolarSystem {
   constructor() {
@@ -40,7 +41,8 @@ class SolarSystem {
       }, {shadow: true}),
       this.orbitModule,
       this.mouse,
-      // new VRKit.VRModule()
+      new WHS.ResizeModule(),
+      new VRKit.VRModule()
     ]);
     this.space = new WHS.Group();
     this.planets = new WHS.Group();
@@ -51,6 +53,14 @@ class SolarSystem {
       emissive: 0x270000,
       roughness: 0.9
     });
+
+    // this.cm = new VRKit.VRControls({
+    //   object: this.camera,
+    //   intensity: 10
+    // });
+    //
+    // this.app.module(this.cm);
+
     this.mat = [
       new THREE.MeshPhongMaterial({color: colors.green, shading: THREE.FlatShading}),
       new THREE.MeshPhongMaterial({color: colors.blue, shading: THREE.FlatShading}),
@@ -104,6 +114,8 @@ class SolarSystem {
   init() {
     this.sun = star(this.properties.sunSize, colors.sun);
     this.sun.addTo(this.space);
+
+    // this.app.module(this.cm);
 
     const planetsArr = [];
     for (let i = 0; i < this.properties.planetCount; i++) {
