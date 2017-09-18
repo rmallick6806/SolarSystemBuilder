@@ -42,7 +42,7 @@ class SolarSystem {
       this.orbitModule,
       this.mouse,
       new WHS.ResizeModule(),
-      new VRKit.VRModule()
+      new VRKit.VR2Module()
     ]);
     this.space = new WHS.Group();
     this.planets = new WHS.Group();
@@ -54,12 +54,12 @@ class SolarSystem {
       roughness: 0.9
     });
 
-    // this.cm = new VRKit.VRControls({
-    //   object: this.camera,
-    //   intensity: 10
-    // });
-    //
-    // this.app.module(this.cm);
+    this.cm = new VRKit.VRControls({
+      object: this.camera,
+      intensity: 10
+    });
+
+    this.app.module(this.cm);
 
     this.mat = [
       new THREE.MeshPhongMaterial({color: colors.green, shading: THREE.FlatShading}),
@@ -115,7 +115,7 @@ class SolarSystem {
     this.sun = star(this.properties.sunSize, colors.sun);
     this.sun.addTo(this.space);
 
-    // this.app.module(this.cm);
+    this.app.module(this.cm);
 
     const planetsArr = [];
     for (let i = 0; i < this.properties.planetCount; i++) {
