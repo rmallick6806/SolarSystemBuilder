@@ -7,6 +7,8 @@
 }
 
 body {
+  overflow: hidden;
+
   margin: 0;
   padding: 0;
   font-family: sans-serif;
@@ -30,6 +32,7 @@ body {
 }
 
 .whs-app {
+  position: absolute;
   background-image:
   radial-gradient(white, rgba(255,255,255,0.0) 2px, transparent 40px),
   radial-gradient(white, rgba(255,255,255,0.0) 1px, transparent 30px),
@@ -181,7 +184,6 @@ body {
   color: white;
   text-align: left;
   background: #f2c66d;
-  background: transparent;
   font-family: Josefin Sans, serif;
   padding: 30px 30px;
   font-size: 28px;
@@ -204,7 +206,6 @@ body {
   color: white;
   text-align: left;
   background: #f2c66d;
-  background: transparent;
   font-family: Josefin Sans, serif;
   padding: 30px 30px;
   font-size: 28px;
