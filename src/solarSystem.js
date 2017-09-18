@@ -42,7 +42,7 @@ class SolarSystem {
       this.orbitModule,
       this.mouse,
       new WHS.ResizeModule(),
-      new VRKit.VR2Module()
+      new VRKit.VRModule()
     ]);
     this.space = new WHS.Group();
     this.planets = new WHS.Group();
