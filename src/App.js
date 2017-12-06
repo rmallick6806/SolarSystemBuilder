@@ -777,7 +777,6 @@ class App extends Component {
                   <MenuItem value={5} primaryText="I don't trust you, giant computer." />
                 </SelectField>
               </MuiThemeProvider>
-
               <h5> What is your favorite animal? </h5>
               <MuiThemeProvider muiTheme={muiTheme}>
                 <SelectField

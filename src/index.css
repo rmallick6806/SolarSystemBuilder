@@ -75,7 +75,7 @@ body {
 }
 
 .welcome-to {
-  font-size: 72px;
+  font-size: 52px;
   text-shadow: 2px 2px black;
   font-family: Pacifico, cursive;
 }
@@ -83,7 +83,7 @@ body {
 .system-name {
   text-shadow: 2px 2px black;
   font-family: Josefin Sans, serif;
-  font-size: 52px;
+  font-size: 32px;
 }
 
 .main-header {
@@ -129,16 +129,17 @@ body {
   left: 0;
   right: 0;
   margin: auto;
-  width: 500px;
+  width: 250px;
   color: white;
   text-align: left;
   background: #f2c66d;
   font-family: Josefin Sans, serif;
-  padding: 30px 30px;
-  font-size: 28px;
+  padding: 10px 10px;
+  font-size: 14px;
+  -webkit-box-shadow: 1px 1px 6px 0px black;
   box-shadow: 1px 1px 6px 0px black;
   text-shadow: 1px 1px grey;
-  border: 10px dashed #f07464;
+  border: 3px dashed #f07464;
   border-radius: 5px;
 }
 
@@ -167,7 +168,7 @@ body {
   background: #f2c66d;
   font-family: Josefin Sans, serif;
   padding: 30px 30px;
-  font-size: 28px;
+  font-size: 15px;
   box-shadow: 1px 1px 6px 0px black;
   text-shadow: 1px 1px grey;
   border: 10px dashed #f07464;
@@ -202,16 +203,16 @@ body {
   bottom: 20px;
   z-index: 1;
   right: 30px;
-  width: 500px;
+  width: 300px;
   color: white;
   text-align: left;
   background: #f2c66d;
   font-family: Josefin Sans, serif;
   padding: 30px 30px;
-  font-size: 28px;
+  font-size: 18px;
   box-shadow: 1px 1px 6px 0px black;
   text-shadow: 1px 1px grey;
-  border: 10px dashed #f07464;
+  border: 8px dashed #f07464;
   border-radius: 5px;
   display: none;
 }
@@ -230,7 +231,7 @@ body {
   background: #f07464;
   text-align: center;
   border-radius: 10px;
-  padding: 30px;
+  padding: 10px;
 }
 
 .generate-system-button:hover{
@@ -246,11 +247,12 @@ body {
   text-align: left;
   background: #f2c66d;
   font-family: Josefin Sans, serif;
-  padding: 30px 30px;
-  font-size: 28px;
+  padding: 10px 10px;
+  font-size: 14px;
+  -webkit-box-shadow: 1px 1px 6px 0px black;
   box-shadow: 1px 1px 6px 0px black;
   text-shadow: 1px 1px grey;
-  border: 10px dashed #f07464;
+  border: 3px dashed #f07464;
   border-radius: 5px;
 }
 
@@ -262,7 +264,7 @@ body {
 
 #followHomePlanetButton {
   left: initial;
-  right: 460px;
+  right: 300px;
   width: initial;
 }
 
